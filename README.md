@@ -15,7 +15,7 @@ Python restricts stylistic choices so that code written by a developer in Tokyo 
 ## 3 | But, I got used to it. It's also more relaxing to work with.
 The functions I want to have back are these that I can find back in old pieces of code of me. The name between brackets is the platform it was used in.
 
-##[SesamID] 
+## [SesamID] 
 1. A full OAUTH2, PKCE and very universal signing library with hardware token support like Yubikey from any to any protocol
 2. Secure container creation, using, pruning, sharing and duplicating with hardware tokens. Zero Trust principle.
 3. Multi-Tenant, Multi-Company, Multi-User, VIRTUAL, SHADOW and VHOSTS with split and secure (encrypted) storage spaces
@@ -27,7 +27,7 @@ The functions I want to have back are these that I can find back in old pieces o
 9. API multi-connect (API to API but also OUTSIDE API to OUTSIDE API bridging)
 10. Context-Aware Multi-Tier Hardware OTP Security Engine
 
-##[ArtistPLUG.ME] (v0.885/beta)
+## [ArtistPLUG.ME] (v0.885/beta)
 1. A very versatile library that supported widgets, movable windows and next generation web protocols (for webos)
 2. Secure container creation, using, pruning, sharing and duplicating with hardware tokens
 4. All the windows were configurable till the smallest details with VeXX configuration files (XML)
@@ -38,14 +38,14 @@ The functions I want to have back are these that I can find back in old pieces o
 9. Audio and Video mastering through API with DSP routines and registration to Soundcloud
 10. It also had a Mood-O-Meter metadata engine.
 
-##[DashFEED] 
+## [DashFEED] 
 1. Aggregation of data (objects, file formats) - to - data (objects, file formats) - everything configurable, even the output style
 2. Creating an universal and abstract structure that could take any structure or feed from file and the internet
 3. With best choices for web, resolutions and other devices
 4. It had all calendar and time and date utilities needed, even a timeline and merge time function
 5. It had a very advanced shopping-routing system to search and display all products available by the artist on other stores
 
-##[Between ALL projects]    
+## [Between ALL projects]    
 1. VisualMIX::Cache::File (v0.06) The best most automatic caching there was available, for (temporary) files and different formats
 2. VisualMIX::SecureSession which was giving sessions between all 3 platforms with everything and more needed + API support
 3. VisualMIX::Common (v0.22) had all the common tools needed to create a web application. It also had support for all languages.
