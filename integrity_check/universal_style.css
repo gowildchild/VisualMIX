@@ -1,0 +1,220 @@
+/**
+ * 🔬 Universal Zero-Trust Dashboard Theme Matrix
+ * High-density responsive grid environment supporting desktops and mobile screens.
+ */
+
+:root {
+    --bg-main: #0f141c;
+    --bg-panel: #161b22;
+    --bg-input: #0d1117;
+    --border: #30363d;
+    --text: #e1e7f0;
+    --text-muted: #8b949e;
+    --accent: #58a6ff;
+    --green: #3fb950;
+    --orange: #d29922;
+    --red: #f85149;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg-main);
+    color: var(--text);
+    margin: 0;
+    padding: 15px;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.dashboard-container {
+    max-width: 1800px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.panel {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+h1, h2 {
+    font-size: 14px;
+    margin: 0;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #21262d;
+    color: var(--accent);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+}
+
+label {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 500;
+    display: block;
+}
+
+select, input[type="text"], textarea {
+    width: 100%;
+    background: var(--bg-input);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px;
+    box-sizing: border-box;
+    font-family: monospace;
+    font-size: 12px;
+}
+
+textarea {
+    height: 110px;
+    resize: vertical;
+}
+
+.control-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 15px;
+}
+
+.action-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 15px;
+}
+
+button {
+    background: var(--green);
+    color: white;
+    border: 1px solid rgba(240,246,252,0.1);
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 12px;
+    transition: background 0.1s;
+}
+
+button:hover {
+    background: #2ea043;
+}
+
+button.secondary {
+    background: #30363d;
+    color: var(--text);
+}
+
+button.secondary:hover {
+    background: #3c444d;
+}
+
+button.danger {
+    background: var(--red);
+}
+
+button.danger:hover {
+    background: #da3633;
+}
+
+.led-container {
+    display: flex;
+    align-items: center;
+    font-size: 11px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.led-indicator {
+    width: 10px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 6px;
+    box-shadow: 0 0 6px rgba(0,0,0,0.5);
+}
+
+.led-green {
+    background: var(--green);
+    box-shadow: 0 0 8px var(--green);
+}
+
+.led-orange {
+    background: var(--orange);
+    box-shadow: 0 0 8px var(--orange);
+}
+
+.led-red {
+    background: var(--red);
+    box-shadow: 0 0 8px var(--red);
+}
+
+.log-box {
+    height: 100px;
+    overflow-y: auto;
+    background: var(--bg-input);
+    font-family: monospace;
+    font-size: 11px;
+    padding: 6px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text-muted);
+}
+
+.hidden-node {
+    display: none !important;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 5px;
+    font-size: 12px;
+}
+
+th, td {
+    text-align: left;
+    padding: 6px;
+    border-bottom: 1px solid #21262d;
+}
+
+th {
+    color: var(--text-muted);
+    background: #1f242c;
+}
+
+pre {
+    background: var(--bg-input);
+    padding: 8px;
+    border-radius: 6px;
+    overflow-x: auto;
+    font-size: 11px;
+    border: 1px solid #21262d;
+    margin: 0;
+}
+
+.diff-del {
+    color: var(--red);
+    background: rgba(248,81,73,0.05);
+    text-decoration: line-through;
+}
+
+.diff-add {
+    color: var(--green);
+    background: rgba(56,139,60,0.05);
+}
+
+/* 📱 Responsive viewport break rules for larger medium/desktop environments */
+@media (min-width: 992px) {
+    .action-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
