@@ -9,10 +9,7 @@ const DEFAULT_TEST_URL = "https://raw.githubusercontent.com/gowildchild/VisualMI
 window.onload = function() {
     writeLogToPanel("Initializing zero-trust asynchronous persistent cache engines...");
     
-    // 1. Initialize persistent dropdown options based on supported schema keys
-    initializeStaticDropdownMenus();
-
-    // 2. Ingest source mode layout states from memory if overrides exist
+    // 1. Ingest configuration parameters from memory if overrides exist
     if (localStorage.getItem("cache_meta_source_mode")) {
         document.getElementById("meta-source-select").value = localStorage.getItem("cache_meta_source_mode");
     }
@@ -26,20 +23,8 @@ window.onload = function() {
         document.getElementById("test-url-field").value = localStorage.getItem("cache_test_custom_url");
     }
 
-    toggleSourceInterfaceVisibility('meta');
-    toggleSourceInterfaceVisibility('source');
-    
-    const cachedMeta = localStorage.getItem("cache_integrity_meta_text");
-    const cachedTest = localStorage.getItem("cache_integrity_test_text");
-    
-    if (cachedMeta && cachedTest) {
-        document.getElementById("meta-json-area").value = cachedMeta;
-        document.getElementById("test-json-area").value = cachedTest;
-        writeLogToPanel("Restored custom local overrides from browser memory storage configuration.");
-        evaluateWorkspaceState(JSON.parse(cachedMeta), JSON.parse(cachedTest));
-    } else {
-        triggerRemoteUrlFetchSync();
-    }
+    // 2. Trigger a hard initial bootstrap file retrieval pass
+    triggerRemoteUrlFetchSync();
 };
 
 function writeLogToPanel(msg) {
