@@ -126,13 +126,14 @@ const DEFAULT_TEST_URL = "https://raw.githubusercontent.com/gowildchild/VisualMI
 window.onload = function() {
     writeLogToPanel("Initializing zero-trust asynchronous persistent cache engines...");
     
-    // Ingest parameters from memory if overrides exist, otherwise request from GitHub
     const cachedMeta = localStorage.getItem("cache_integrity_meta_text");
     const cachedTest = localStorage.getItem("cache_integrity_test_text");
     
     if (cachedMeta && cachedTest) {
-        document.getElementById("meta-json-area").value = cachedMeta;
-        document.getElementById("test-json-area").value = cachedTest;
+        const metaArea = document.getElementById("meta-json-area");
+        const testArea = document.getElementById("test-json-area");
+        if (metaArea) metaArea.value = cachedMeta;
+        if (testArea) testArea.value = cachedTest;
         writeLogToPanel("Restored custom local overrides from browser memory storage configuration.");
         evaluateWorkspaceState(JSON.parse(cachedMeta), JSON.parse(cachedTest), "CACHE_SYNC");
     } else {
@@ -159,15 +160,18 @@ function bootstrapRemoteRepositoryFetch() {
             return Promise.all([metaRes.json(), testRes.json()]);
         })
         .then(([metaJson, testJson]) => {
-            document.getElementById("meta-json-area").value = JSON.stringify(metaJson, null, 2);
-            document.getElementById("test-json-area").value = JSON.stringify(testJson, null, 2);
+            const metaArea = document.getElementById("meta-json-area");
+            const testArea = document.getElementById("test-json-area");
+            if (metaArea) metaArea.value = JSON.stringify(metaJson, null, 2);
+            if (testArea) testArea.value = JSON.stringify(testJson, null, 2);
             writeLogToPanel("Successfully fetched baseline configuration files from GitHub source.");
             evaluateWorkspaceState(metaJson, testJson, "GITHUB_BOOT");
         })
         .catch(err => {
             writeLogToPanel(`❌ GitHub Fetch Aborted: ${err.message}`);
             setVisualLedStatus("red", "Config Faulty");
-            document.getElementById('file-status').innerHTML = "⚠️ Remote baseline down. Please paste your custom Meta and Test JSON objects directly into the sidebar textareas.";
+            const statusEl = document.getElementById('file-status');
+            if (statusEl) statusEl.innerHTML = "⚠️ Remote baseline down. Please paste your custom Meta and Test JSON objects directly into the sidebar textareas.";
         });
 }
 
@@ -190,7 +194,8 @@ function processLocalMetaOverride() {
         if (masterConfig) evaluateWorkspaceState(parsedMeta, masterConfig, "LOCAL_META_OVERRIDE");
     } catch(e) {
         setVisualLedStatus("red", "Config Faulty");
-        document.getElementById('file-status').innerHTML = "❌ Meta Configuration Area contains broken or invalid JSON syntax.";
+        const statusEl = document.getElementById('file-status');
+        if (statusEl) statusEl.innerHTML = "❌ Meta Configuration Area contains broken or invalid JSON syntax.";
     }
 }
 
@@ -203,7 +208,8 @@ function processLocalTestOverride() {
         if (metaConfig) evaluateWorkspaceState(metaConfig, parsedTest, "LOCAL_TEST_OVERRIDE");
     } catch(e) {
         setVisualLedStatus("red", "Config Faulty");
-        document.getElementById('file-status').innerHTML = "❌ Workspace Schema Area contains broken or invalid JSON syntax.";
+        const statusEl = document.getElementById('file-status');
+        if (statusEl) statusEl.innerHTML = "❌ Workspace Schema Area contains broken or invalid JSON syntax.";
     }
 }
 
@@ -229,11 +235,14 @@ function evaluateWorkspaceState(metaJson, testJson, executionContext) {
     currentAlgo = metaProfile.selected_algorithm || "md5";
     metaRegistryName = metaProfile.target_registry_key || "CHECKSUM_HASH_REGISTRY";
     
-    document.getElementById("algo-select").value = currentAlgo;
-    document.getElementById('file-status').innerHTML = `✅ Ready. Engine synced using variant: [${currentAlgo.toUpperCase()}]`;
-    document.getElementById('action-panel').style.display = 'block';
+    const algoSel = document.getElementById("algo-select");
+    const statusEl = document.getElementById('file-status');
+    const actionPanel = document.getElementById('action-panel');
     
-    // Switch widget indicator to Green: Workspace is compiled and ready to capture checks
+    if (algoSel) algoSel.value = currentAlgo;
+    if (statusEl) statusEl.innerHTML = `✅ Ready. Engine synced using variant: [${currentAlgo.toUpperCase()}]`;
+    if (actionPanel) actionPanel.style.display = 'block';
+    
     setVisualLedStatus("green", "Ready to Verify");
     generateAndShowChallenge();
 }
@@ -244,12 +253,13 @@ function generateAndShowChallenge() {
     if (challenge.SYSTEM_BASELINE_CONFIG && challenge.SYSTEM_BASELINE_CONFIG[metaRegistryName]) {
         delete challenge.SYSTEM_BASELINE_CONFIG[metaRegistryName];
     }
-    document.getElementById('challenge-output').value = JSON.stringify(challenge, null, 2);
+    const challengeOut = document.getElementById('challenge-output');
+    if (challengeOut) challengeOut.value = JSON.stringify(challenge, null, 2);
 }
 
 function runWebDashboardAudit() {
     const inputArea = document.getElementById('session-input').value.trim();
-    if (!inputArea || !masterConfig) { alert("Missing configuration arrays."); return; }
+    if (!inputArea || !masterConfig) { alert("Missing execution data arrays."); return; }
     
     let incoming;
     try {
@@ -257,7 +267,7 @@ function runWebDashboardAudit() {
         incoming = JSON.parse(text);
     } catch(e) {
         setVisualLedStatus("orange", "Faulty Intercept");
-        document.getElementById('report-panel').innerHTML = "<h3>❌ CRITICAL DATA DISCONNECT: Pasted clipboard payload is completely invalid JSON syntax.</h3>";
+        document.getElementById('report-panel').innerHTML = "<h3>❌ CRITICAL DATA DISCONNECT: Payload syntax corrupt.</h3>";
         return;
     }
 
@@ -265,7 +275,6 @@ function runWebDashboardAudit() {
     let htmlReport = "<h2>🔬 LIVE ZERO-TRUST METRICS INTERROGATION LOG</h2>";
     let codeDiffs = "", overallPassed = true;
 
-    // Isolate structural file line checks if user pasted a full template framework
     if (incoming.SYSTEM_BASELINE_CONFIG?.master_pipeline_schema) {
         const incomingSchema = incoming.SYSTEM_BASELINE_CONFIG.master_pipeline_schema;
         for (let cat in schema) {
@@ -273,7 +282,7 @@ function runWebDashboardAudit() {
             const incomingSrc = incomingSchema[cat] ? incomingSchema[cat].ground_truth_source : "";
             if (activeSrc !== incomingSrc) {
                 overallPassed = false;
-                codeDiffs += `<h3>📍 Logical Drift Trapped inside component target: ${cat}</h3>`;
+                codeDiffs += `<h3>📍 Logical Drift Trapped inside module target: ${cat}</h3>`;
                 codeDiffs += `<pre><span class="diff-del">${escapeHtml(activeSrc)}</span>\n\n<span class="diff-add">${escapeHtml(incomingSrc)}</span></pre>`;
             }
         }
@@ -299,7 +308,6 @@ function runWebDashboardAudit() {
     });
     tableHtml += "</table>";
 
-    // Set LED status widget dynamically based on evaluation verdict
     if (overallPassed) {
         setVisualLedStatus("green", "Verified Pass");
     } else {
