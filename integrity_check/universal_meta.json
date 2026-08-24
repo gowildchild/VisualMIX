@@ -1,6 +1,6 @@
 {
   "INTEGRITY_META_PROFILE": {
-    "version": "0.0.1-Alpha",
+    "version": "0.0.2-Alpha",
     "selected_algorithm": "md5",
     "supported_algorithms": ["md5", "sha1", "sha256"],
     "target_registry_key": "CHECKSUM_HASH_REGISTRY",
