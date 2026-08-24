@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VisualMIX | Zero-Trust Integrity Console</title>
+    <link rel="stylesheet" href="universal_style.css">
+    <script src="https://raw.githubusercontent.com/gowildchild/VisualMIX/refs/heads/main/integrity_check/universal_meta.js" defer></script>
+    <script src="https://raw.githubusercontent.com/gowildchild/VisualMIX/refs/heads/main/integrity_check/universal_crypto.js" defer></script>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Status & Monitoring Bar -->
+        <div class="panel" style="flex-direction: row; justify-content: space-between; align-items: center; padding: 8px 12px;">
+            <div class="led-container">
+                <div id="status-led" class="led-indicator led-orange"></div>
+                <span id="status-text">Booting Engine</span>
+            </div>
+            <div style="font-size: 11px; color: var(--text-muted);" id="file-status">Initializing memory caches...</div>
+        </div>
+
+        <!-- 🧩 Box 1 & Box 2: Configuration Inputs Controls Grid -->
+        <div class="control-grid">
+            <!-- Box 1: MASTER META JSON -->
+            <div class="panel" id="panel-meta">
+                <h2>1. Master Meta Configuration</h2>
+                <label>Ingestion Route Select:</label>
+                <select id="meta-source-select" onchange="togglePanelNodeVisibility('meta')"></select>
+                <div id="meta-url-container" class="hidden-node">
+                    <label>Remote Profile URL Location:</label>
+                    <input type="text" id="meta-url-field" onchange="syncPanelData('meta')">
+                </div>
+                <div id="meta-input-container" class="hidden-node">
+                    <label>Manual Text Payload State Buffer:</label>
+                    <textarea id="meta-json-area" placeholder="Paste check_integrity_meta.json array..." oninput="handleTypingState('meta')"></textarea>
+                </div>
+                <div style="display: flex; gap: 8px; margin-top: auto;">
+                    <button class="secondary" onclick="exportSettingsJsonFile()">Backup Profiles</button>
+                </div>
+            </div>
+
+            <!-- Box 2: SOURCE JSON -->
+            <div class="panel" id="panel-source">
+                <h2>2. Protected Source Blueprint</h2>
+                <label>Ingestion Route Select:</label>
+                <select id="test-source-select" onchange="togglePanelNodeVisibility('source')"></select>
+                <div id="test-url-container" class="hidden-node">
+                    <label>Remote Workspace URL Location:</label>
+                    <input type="text" id="test-url-field" onchange="syncPanelData('source')">
+                </div>
+                <div id="test-input-container" class="hidden-node">
+                    <label>Manual Text Payload State Buffer:</label>
+                    <textarea id="test-json-area" placeholder="Paste check_integrity_test.json array..." oninput="handleTypingState('source')"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- 🧩 Box 3 & Box 4: Interactive Challenge Session Cockpit Grid -->
+        <div class="action-grid hidden-node" id="workspace-action-zone">
+            <!-- Box 3: CHALLENGE/ACTION copy field -->
+            <div class="panel">
+                <h2>3. Verification Challenge Output</h2>
+                <label>Target Execution Strategy Action Selector:</label>
+                <select id="action-strategy-select" onchange="handleActionStrategySwap()"></select>
+                <label>Active Copypaste Buffer Code Vector Prompt String:</label>
+                <textarea id="challenge-output" readonly onclick="this.select()" style="height: 150px; background: var(--bg-input); font-size:11px;"></textarea>
+            </div>
+
+            <!-- Box 4: THE CHECK BOX clipboard validator -->
+            <div class="panel">
+                <h2>4. Session Token Intercept Check</h2>
+                <label>Target Hash Verification Routing Syntax Profile Selector:</label>
+                <select id="check-syntax-select" onchange="handleVerificationSyntaxSwap()"></select>
+                <label>Pasted Clipboard Session Intercept Snapshot Container Area:</label>
+                <textarea id="session-input" placeholder="Paste live AI response variables block directly here..." style="height: 150px;"></textarea>
+                <button onclick="runCryptographicDashboardAudit()">Execute Cryptographic Evaluation Diff</button>
+            </div>
+        </div>
+
+        <!-- Dynamic Visualization Reports Frame Panel -->
+        <div id="report-panel" class="panel hidden-node" style="background: var(--bg-input);"></div>
+
+        <!-- System Diagnostic Log Panel -->
+        <div class="panel">
+            <h2>System Debug Diagnostic Execution Log</h2>
+            <div id="local-log" class="log-box"></div>
+            <div style="display:flex; justify-content:space-between; gap:10px;">
+                <button onclick="document.getElementById('local-log').innerHTML='';" class="secondary" style="padding: 4px 8px; font-size:11px;">Flush View Logs</button>
+                <button class="danger" onclick="executeFactoryResetPurge()" style="padding: 4px 8px; font-size:11px;">Purge Storage</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
