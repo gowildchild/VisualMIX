@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zero-Trust Integrity Check</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; background: #0f141c; color: #e1e7f0; margin: 0; padding: 20px; font-size: 14px; }
+        .grid { display: grid; grid-template-columns: 360px 1fr; gap: 20px; max-width: 1600px; margin: 0 auto; }
+        .panel { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 15px; margin-bottom: 20px; }
+        h1, h2 { color: #58a6ff; font-size: 16px; margin: 0 0 12px 0; border-bottom: 1px solid #21262d; padding-bottom: 6px; display: flex; justify-content: space-between; align-items: center; }
+        label { font-size: 12px; color: #8b949e; display: block; margin-bottom: 4px; font-weight: 500; }
+        input[type="text"], textarea, select { width: 100%; background: #0d1117; color: #c9d1d9; border: 1px solid #30363d; border-radius: 6px; padding: 8px; box-sizing: border-box; font-family: monospace; font-size: 12px; margin-bottom: 12px; }
+        textarea.source-box { height: 180px; }
+        textarea.intercept-box { height: 120px; }
+        button { background: #238636; color: #fff; font-weight: bold; border: 1px solid rgba(240,246,252,0.1); border-radius: 6px; padding: 10px; width: 100%; cursor: pointer; transition: background 0.1s; }
+        button:hover { background: #2ea043; }
+        button.reset { background: #da3633; margin-top: 5px; } button.reset:hover { background: #f85149; }
+        .log-box { height: 130px; overflow-y: auto; background: #0d1117; font-family: monospace; font-size: 11px; padding: 6px; border: 1px solid #30363d; border-radius: 6px; color: #8b949e; margin-bottom: 10px; }
+        
+        /* 🔬 Status LED Component Styles */
+        .led-container { display: flex; align-items: center; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; }
+        .led-indicator { width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; box-shadow: 0 0 8px rgba(0,0,0,0.5); transition: background 0.2s, box-shadow 0.2s; }
+        .led-green { background: #3fb950; box-shadow: 0 0 10px #3fb950; }
+        .led-orange { background: #d29922; box-shadow: 0 0 10px #d29922; }
+        .led-red { background: #f85149; box-shadow: 0 0 10px #f85149; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
+        th, td { text-align: left; padding: 6px; border-bottom: 1px solid #21262d; }
+        th { color: #8b949e; background: #1f242c; }
+        pre { background: #0d1117; padding: 10px; border-radius: 6px; overflow-x: auto; font-size: 12px; border: 1px solid #21262d; }
+        .diff-del { color: #f85149; background: rgba(248,81,73,0.05); text-decoration: line-through; }
+        .diff-add { color: #3fb950; background: rgba(56,139,60,0.05); }
+    </style>
+    <!-- Links natively to your custom script module file -->
+    <script src="check_integrity_meta.js"></script>
+</head>
+<body>
+    <div class="grid">
+        <div>
+            <div class="panel">
+                <h2><span>⚙️ System Engine</span> <div class="led-container"><div id="status-led" class="led-indicator led-orange"></div><span id="status-text">Booting</span></div></h2>
+                
+                <label>1. Master Meta Configuration Source:</label>
+                <textarea id="meta-json-area" class="source-box" placeholder="Paste or load check_integrity_meta.json data..." oninput="processLocalMetaOverride()"></textarea>
+                
+                <label>2. Protected Workspace Source Schema:</label>
+                <textarea id="test-json-area" class="source-box" placeholder="Paste or load check_integrity_test.json data..." oninput="processLocalTestOverride()"></textarea>
+                
+                <label>Selected Hashing Core:</label>
+                <select id="algo-select" onchange="handleManualAlgoOverride()">
+                    <option value="md5">MD5 (Fast / Verified)</option>
+                    <option value="sha1">SHA-1 (Legacy)</option>
+                    <option value="sha256">SHA-256 (Secure)</option>
+                </select>
+                <button class="reset" onclick="purgeBrowserMemoryCache()">Purge Cache & Sync Defaults</button>
+            </div>
+            <div class="panel">
+                <h2>📋 Operation Event Log</h2>
+                <div id="local-log" class="log-box"></div>
+                <button onclick="document.getElementById('local-log').innerHTML='';" style="background:#30363d; font-size:12px; padding:4px;">Clear View Logs</button>
+            </div>
+        </div>
+        <div>
+            <div class="panel">
+                <h2>Step 1: Session Challenge Code Vector Copy-Zone</h2>
+                <p style="font-size:12px; color:#8b949e; margin:0 0 6px 0;"><b>COPY THE CHALLENGE UNDER HERE TO THE PROMPT:</b></p>
+                <textarea id="challenge-output" readonly onclick="this.select()" style="height:160px; background:#0d1117;"></textarea>
+            </div>
+            <div class="panel">
+                <h2>Step 2: Paste Interrogation Snapshot Data Intercept</h2>
+                <p style="font-size:12px; color:#8b949e; margin:0 0 6px 0;">Paste full multi-pillar JSON code structures or isolated token register checksum payloads:</p>
+                <textarea id="session-input" class="intercept-box" placeholder="Paste target verification variables block directly here..."></textarea>
+                <button onclick="executeCryptographicVerificationDiff()">Run Cryptographic Evaluation Diff</button>
+            </div>
+            <div id="report-panel" class="panel" style="background:#0d1117; min-height:100px;">
+                <p style="color: #8b949e; font-style: italic; text-align: center; margin-top:30px;">Awaiting snapshot intercept data stream input...</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
