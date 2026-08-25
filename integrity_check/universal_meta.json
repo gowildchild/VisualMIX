@@ -20,7 +20,7 @@
         "source": ["json_meta_challenge","json_meta_integrity", "URL", "INPUT", "DIRECT"],
         "action": ["CHALLENGE", "INTEGRITY"],
         "check":  ["MD5:CATEGORY_A","MD5:CATEGORY_B","MD5:CATEGORY_C","MD5:CATEGORY_D","CHAIN:SHA-256"],
-        "bitmask": "0x00000000",
+        "bitmask": "0x171F1F0F",
         "default":  {
           "bitmask": "0x171F1F0F",
           "source": "json_meta_challenge",
