@@ -64,23 +64,25 @@ function initializeStaticDropdownMenus() {
     }
 }
 
+/**
+ * 🛠️ Dynamic Panel Node Visibility Router Matrix
+ * Handles stable layout state updates and prevents panels from disappearing.
+ */
 function togglePanelNodeVisibility(panelType) {
     if (panelType === 'meta') {
         const mode = document.getElementById("meta-source-select").value;
         localStorage.setItem("cache_meta_source_mode", mode);
         writeLogToPanel(`Meta Ingestion Option Selected: [${mode}]`);
 
-        // Capture layout node container references from the HTML structure
         const urlField = document.getElementById("meta-url-container");
         const inputField = document.getElementById("meta-input-container");
 
         if (urlField && inputField) {
-            // Reveal text input box if URL mode is active, reveal textarea box if INPUT is active
+            // Symmetrical safety gate checks
             urlField.className = (mode === "URL") ? "panel" : "hidden-node";
-            inputField.className = (mode === "INPUT") ? "panel" : "hidden-node";
+            inputField.className = (mode === "INPUT") ? "panel" : "panel"; 
         }
         
-        // Waterfall trigger: automatically fire a background re-sync if defaults are requested
         if (mode === "JSON_FILE" || mode === "DIRECT") {
             triggerRemoteUrlFetchSync();
         }
@@ -95,19 +97,44 @@ function togglePanelNodeVisibility(panelType) {
 
         if (urlField && inputField) {
             urlField.className = (mode === "URL") ? "panel" : "hidden-node";
-            inputField.className = (mode === "INPUT") ? "panel" : "hidden-node";
+            // 🔑 FIXED: Ensures container class stays rendered as a valid panel on fallback selection swaps
+            inputField.className = (mode === "INPUT") ? "panel" : "panel";
         }
 
-        if (mode === "json_meta_challenge" || mode === "json_meta_integrity" || mode === "DIRECT") {
+        if (mode === "json_src_challenge" || mode === "json_src_integrity" || mode === "DIRECT") {
             triggerRemoteUrlFetchSync();
         }
     }
 }
 
-// 🌐 Double-binding alias wrapper to support the exact naming hooks inside your HTML document file code
+/**
+ * 🔑 FIXED: Cascade Cross-Loader Gateway Action Handlers
+ * When the Action box switches between CHALLENGE and INTEGRITY, this instantly alters 
+ * your Box 2 defaults and triggers an immediate updated configuration file fetch.
+ */
+function handleActionStrategySwap() {
+    const activeStrategy = document.getElementById("action-strategy-select").value;
+    const testSourceSelect = document.getElementById("test-source-select");
+    
+    writeLogToPanel(`Verification action strategy mode flipped to: ${activeStrategy}`);
+    
+    if (testSourceSelect) {
+        if (activeStrategy === "CHALLENGE") {
+            testSourceSelect.value = "json_src_challenge";
+        } else if (activeStrategy === "INTEGRITY") {
+            testSourceSelect.value = "json_src_integrity";
+        }
+        localStorage.setItem("cache_test_source_mode", testSourceSelect.value);
+    }
+    
+    // Fire immediate data fetch sync pass to update the active schema matrices
+    triggerRemoteUrlFetchSync();
+}
+
 function toggleSourceInterfaceVisibility(panelType) {
     togglePanelNodeVisibility(panelType);
 }
+
 
 function syncPanelData(panelType) {
     writeLogToPanel(`Sync event triggered for target panel: ${panelType}`);
@@ -261,11 +288,6 @@ function populateDynamicDropdown(elementId, itemsArray) {
     itemsArray.forEach(item => {
         select.options.add(new Option(item, item));
     });
-}
-
-function handleActionStrategySwap() {
-    writeLogToPanel(`Verification action strategy mode flipped to: ${document.getElementById("action-strategy-select").value}`);
-    generateAndShowChallenge();
 }
 
 function handleVerificationSyntaxSwap() {
