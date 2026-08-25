@@ -28,7 +28,7 @@
           "registry": "CHECKSUM_MD5HASH_REGISTRY",
           "keys": ["CATEGORY_A","CATEGORY_B","CATEGORY_C","CATEGORY_D"],
           "check": ["src","envelope"]
-        },                    
+        }
     },
     "path": "https://raw.githubusercontent.com/gowildchild/VisualMIX/refs/heads/main/integrity_check/",
     "locations": {
