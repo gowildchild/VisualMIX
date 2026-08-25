@@ -1,0 +1,130 @@
+/** 
+ * * 3D Buttonsv0.3
+ *** Dashboard 3D Buttonsm            VisualMIX/front_end/ui/3D_buttons.css
+ ** (c)2006-2012 Gunther Voet
+**/
+
+.btn3d {
+        display: inline-block;
+        position: relative;
+        top: -4px;
+        border: 0;
+        transition: all 40ms linear;
+        margin: 6px 2.5px;
+        padding: 8px 18px;
+        font-family: sans-serif;
+        border-radius: 4px;
+        text-decoration: none;
+        cursor: pointer;
+        text-align: center;
+        box-sizing: border-box;
+        white-space: nowrap !important;
+        color: var(--3d-text);
+        background-color: var(--3d-bg);
+        transform-origin: top; /* Keeps coordinate origin fixed on the cursor position */
+        box-shadow: 
+                0 0 0 1px var(--3d-border) inset, 
+                0 0 0 2px var(--3d-glow, rgba(255, 255, 255, 0.10)) inset, 
+                0 var(--3d-shadow-bot, 8px) 0 0 var(--3d-shadow), 
+                0 var(--3d-shadow-bot, 8px) var(--3d-shadow-bot, 8px) 1px rgba(0, 0, 0, .2);
+}
+
+.btn3d:active:focus, .btn3d:focus:hover, .btn3d:focus {
+        -moz-outline-style: none;
+        outline: medium none;
+}
+
+.btn3d:hover {
+        filter: brightness(1.25); 
+}
+
+.btn3d:active, .btn3d.active {
+        top: 2px;
+        color: var(--3d-text);
+        background-color: var(--3d-bg);
+        filter: none;
+
+        text-shadow: 
+          0 0 4px var(--3d-led, rgba(255, 0, 96, 0.8)),
+          0 0 10px var(--3d-led, rgba(255, 0, 96, 0.8)),
+          0 0 20px var(--3d-led, rgba(255, 0, 96, 0.8)),
+          0 0 40px var(--3d-led, rgba(255, 0, 96, 0.8));
+
+        box-shadow: 
+                0 0 0 1px var(--3d-border) inset, 
+                0 0 0 1px var(--3d-glow-active, rgba(255, 255, 255, 0.15)) inset, 
+                0 1px var(--3d-shadow-bot-active, 3px) 6px var(--3d-shadow-active, rgba(0, 0, 0, .1));
+}
+
+.btn3d.btn-xs {
+        padding: 2px 10px; 
+        font-size: 10px;   
+        --3d-shadow-bot-active: 1px;
+        --3d-shadow-bot: 3px;
+}
+
+.btn3d.btn-vs {
+        padding: 4px 14px; 
+        font-size: 10px;
+        --3d-shadow-bot-active: 3px;
+        --3d-shadow-bot: 5px;
+}
+
+.btn3d.btn-sm {
+        padding: 6px 14px; 
+        font-size: 13px;
+        --3d-shadow-bot-active: 2px;
+        --3d-shadow-bot: 6px;
+}
+
+.btn3d.btn-lg {
+        padding: 14px 30px; 
+        font-size: 19px;    
+        --3d-shadow-bot-active: 4px;
+        --3d-shadow-bot: 10px;
+}
+
+.btn-glow {
+  box-shadow: 
+    0 6px 0 #00b35f,                /* 1st: The 3D edge */
+    0 6px 10px #00ff88,             /* 2nd: Sharp glow under the 3D edge */
+    0 10px 25px #00ff88,            /* 3rd: Medium diffuse glow */
+    0 13px 40px rgba(0, 255, 136, 0.6); /* 4th: Wide ambient bleed */
+}
+
+.btn-glow:hover {
+  box-shadow: 
+    0 6px 0 #00b35f,
+    0 6px 15px #00ff88,
+    0 12px 35px #00ff88,
+    0 20px 60px rgba(0, 255, 136, 0.8);
+}
+
+.btn3d.btn-white {
+        --3d-text: #666666; --3d-bg: #fff; --3d-border: #ebebeb; --3d-shadow: #f5f5f5;     --3d-led: #aaa;
+        --3d-glow: rgba(255, 255, 255, 0.10); --3d-glow-active: rgba(255, 255, 255, 0.15); --3d-shadow-active: rgba(0, 0, 0, .1);
+}
+.btn3d.btn-secondary {
+        --3d-text: #ffffff; --3d-bg: #666; --3d-border: #1b1b1b; --3d-shadow: #151515;     --3d-led: #999;
+        --3d-glow: rgba(255, 255, 255, 0.10); --3d-glow-active: rgba(255, 255, 255, 0.15); --3d-shadow-active: rgba(0, 0, 0, .1);
+}
+.btn3d.btn-primary {
+        --3d-text: #ffffff; --3d-bg: #0d6efd; --3d-border: #0b5ed7; --3d-shadow: #0a58ca;  --3d-led: #2e8ffe;
+        --3d-glow: rgba(255, 255, 255, 0.15); --3d-glow-active: rgba(255, 255, 255, 0.15); --3d-shadow-active: rgba(0, 0, 0, .2);
+}
+.btn3d.btn-danger {
+        --3d-text: #ffffff; --3d-bg: #dc3545; --3d-border: #bb2d3b; --3d-shadow: #b02a37;  --3d-led: #ff6595;
+        --3d-glow: rgba(255, 255, 255, 0.15); --3d-glow-active: rgba(255, 255, 255, 0.15); --3d-shadow-active: rgba(0, 0, 0, .2);
+}
+.btn3d.btn-success {
+        --3d-text: #ffffff; --3d-bg: #198754; --3d-border: #157347; --3d-shadow: #146c43;  --3d-led: #00ff88;
+        --3d-glow: rgba(255, 255, 255, 0.15); --3d-glow-active: rgba(255, 255, 255, 0.15); --3d-shadow-active: rgba(0, 0, 0, .2);
+}
+.btn3d.btn-warning {
+        --3d-text: #000000; --3d-bg: #ffc107; --3d-border: #ffca2c; --3d-shadow: #e0a800;  --3d-led: #ffde24;
+        --3d-glow: rgba(255, 255, 255, 0.25); --3d-glow-active: rgba(255, 0, 0, 1.25); --3d-shadow-active: rgba(0, 0, 0, .15);
+}
+.btn3d.btn-warning-off {
+        --3d-text: #000000; --3d-bg: #aa8101; --3d-border: #665a1c; --3d-shadow: #e0a800;  --3d-led: #ffde24;
+        --3d-glow: rgba(255, 255, 255, 0.25); --3d-glow-active: rgba(255, 255, 255, 0.25); --3d-shadow-active: rgba(0, 0, 0, .15);
+}
