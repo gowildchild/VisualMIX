@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bitshift Love | VisualMIX </title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/gowildchild/VisualMIX@main/front-end/ui/dirty_style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/gowildchild/VisualMIX@main/front-end/ui/dirty_menu.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/gowildchild/VisualMIX@main/front-end/telemetry/dirty_leds.css">
+    <script src="https://cdn.jsdelivr.net/gh/gowildchild/VisualMIX@main/front-end/core/universal_crypto.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/gh/gowildchild/VisualMIX@main/front-end/core/universal_meta.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/gh/gowildchild/VisualMIX@main/front-end/telemetry/dirty_tele.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/gh/gowildchild/VisualMIX@main/front-end/ui/engine_templates.js" defer></script> 
+    
+    <style>
+        /* Symmetrical alignment corrections to eliminate framework layout gaps */
+        .hidden-node { display: none !important; }
+        .bit-matrix-grid {
+            display: grid;
+            grid-template-columns: repeat(32, minmax(32px, 1fr));
+            gap: 4px;
+            overflow-x: auto;
+            padding-bottom: 6px;
+            margin: 10px 0;
+        }
+        @media (max-width: 1200px) { .bit-matrix-grid { grid-template-columns: repeat(16, 1fr); } }
+        @media (max-width: 576px) { .bit-matrix-grid { grid-template-columns: repeat(8, 1fr); } }
+        
+        .bit-cell {
+            font-family: monospace; font-size: 11px; font-weight: bold;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            height: 38px; border: 1px solid var(--border); border-radius: 4px;
+            cursor: pointer; user-select: none; transition: all 0.12s ease-in-out;
+        }
+        .bit-cell.active { background-color: var(--green); color: #fff; border-color: rgba(63,185,80,0.4); }
+        .bit-cell .b-idx { font-size: 8px; opacity: 0.5; margin-top: 2px; }
+        
+        /* Custom metadata type borders mapping your exact Python IntFlag specifications */
+        .bit-cell.type-PILLAR { border: 2px solid var(--blue); }
+        .bit-cell.type-PILLAR.active { background-color: var(--blue); color: #fff; }
+        .bit-cell.type-CANARY { border: 2px dashed var(--red); }
+        .bit-cell.type-CANARY.active { background-color: var(--red); color: #fff; animation: pulse-red-alert 2s infinite; }
+        .bit-cell.type-RIGHTS { border: 2px solid var(--green); }
+        .bit-cell.type-RIGHTS.active { background-color: var(--green); color: #fff; }
+        .bit-cell.type-SIGNATURE { border: 2px solid #6f42c1; }
+        .bit-cell.type-SIGNATURE.active { background-color: #6f42c1; color: #fff; }
+        .bit-cell.type-THREAT { border: 2px solid var(--orange); }
+        .bit-cell.type-THREAT.active { background-color: var(--orange); color: #fff; }
+
+        .led-container { display: inline-flex; align-items: center; gap: 8px; font-family: monospace; font-size: 13px; font-weight: bold; }
+        .led-container .led-fixture { margin-right: 0px !important; }
+        
+        @keyframes pulse-red-alert {
+            0% { box-shadow: 0 0 0 0 rgba(248,81,73,0.4); }
+            70% { box-shadow: 0 0 0 6px rgba(248,81,73,0); }
+            100% { box-shadow: 0 0 0 0 rgba(248,81,73,0); }
+        }
+    </style>
+</head>
+<body>
+    <!-- 🌐 Symmetrical SEO Navigation Menu Bar (Perfect for Google Indexing) -->
+    <nav class="top-navbar">
+        <a href="#" class="nav-brand">VisualMIX Console</a>
+        <ul class="nav-menu">
+            <li class="nav-item"><a href="/tools/integrity/">Integrity Check</a></li>
+            <li class="nav-item active"><a href="/tools/bitshift-love/" title="Dynamic 128-Bit Shift Playground">Bitshift Magic</a></li>
+            <li class="nav-item"><a href="https://github.com" target="_blank" rel="noopener">existenZ</a> | <a href="https://xsrv.net" target="_blank" rel="noopener" title="Open Simulator Menu">SIMs</a></li>
+            <li class="nav-item"><a href="https://github.com" target="_blank" rel="noopener">GitHub Repository</a></li>
+        </ul>
+    </nav>
+
+    <nav class="top-navbar">
+        <a href="#" class="nav-brand">VisualMIX Console</a>
+        <ul class="nav-menu">
+            <li class="nav-item active"><a href="/tools/integrity/" title="Zero-Trust Integrity Check Console">Integrity Check</a></li>
+            <li class="nav-item"><a href="/tools/bitshift-love/">Bitshift Magic</a></li>
+            <li class="nav-item"><a href="https://github.com/gowildchild/existenZ/" target="_blank" rel="noopener">existenZ</a> | <a href="https://existenz.xsrv.net/" target="_blank" rel="noopener" title="Open Simulator Menu">SIMs</a></li>
+            <li class="nav-item"><a href="https://github.com/gowildchild/VisualMIX/" target="_blank" rel="noopener">GitHub Repository</a></li>
+        </ul>
+    </nav>
+
+        <!-- Master Core Grid Frame and Radix Converters Flank -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 15px;">
+            
+            <!-- LEFT COMPARTMENT: The Matrix Canvas & Base Conversions Panel -->
+            <div style="display: flex; flex-direction: column; gap: 15px; flex: 2;">
+                <div class="panel glow-top-left op-20" id="configuration-workspace">
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
+                        <h2 id="gridTitle" style="border: none; padding: 0;">🗺️ DYNAMIC STRUCT MATRIX LAYER</h2>
+                        
+                        <!-- Industrial Analog Rotary Turning Knob Container -->
+                        <div class="rotary-knob-wrapper" id="knobWrapper" style="transform: scale(0.85); width: 60px; gap:2px; cursor:pointer;" title="Click Knob to rotate bit architecture width allocations">
+                            <div class="rotary-dial" id="archRotaryDial" style="width:36px; height:36px;">
+                                <div class="rotary-pointer" style="height:10px;"></div>
+                            </div>
+                            <span class="small font-monospace fw-bold text-muted" id="archKnobLabel" style="font-size: 9px;">WIDTH: 32B</span>
+                        </div>
+                    </div>
+
+                    <!-- The Responsive Bit Vector Grid -->
+                    <div id="bitGrid" class="bit-matrix-grid"></div>
+
+                    <!-- Halo Tactile Buttons Operations Block Row -->
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; justify-content: center;">
+                        <button class="halo-btn hl-blue" onclick="executeShiftLeft()" title="Bit Shift Left (&lt;&lt;)">&lt;&lt;</button>
+                        <button class="halo-btn hl-pink" onclick="executeShiftRight()" title="Bit Shift Right (&gt;&gt;)">&gt;&gt;</button>
+                        <button class="halo-btn hl-yellow" onclick="executeInvertNot()" title="Bitwise Invert (~ NOT)">~</button>
+                        <button class="halo-btn hl-green" onclick="executeFillAll()" title="Set All Register Fields to 1">ALL</button>
+                        <button class="halo-btn hl-green" style="background:#da3633; color:white;" onclick="executeClearAll()" title="Wipe Register Fields to 0">CLR</button>
+                    </div>
+                </div>
+
+                <!-- Multi-Radix Side-by-Side Interlocking Input Conversion Port -->
+                <div class="panel glow-bottom-left op-20" id="panel-box-4">
+                    <h2>🔄 Real-Time Converters (Instant Keypress Core Capture)</h2>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; font-family: monospace;">
+                        <div>
+                            <label>Decimal (DEC):</label>
+                            <input type="text" id="inputDec" value="0">
+                        </div>
+                        <div>
+                            <label>Hexadecimal (HEX):</label>
+                            <input type="text" id="inputHex" value="0x0">
+                        </div>
+                        <div>
+                            <label>Binary (BIN):</label>
+                            <input type="text" id="inputBin" value="0b0">
+                        </div>
+                        <div>
+                            <label>Octal (OCT):</label>
+                            <input type="text" id="inputOct" value="0o0">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT COMPARTMENT: Dynamic Ingestion Workspace & Telemetry Diagnostics -->
+            <div style="display: flex; flex-direction: column; gap: 15px; flex: 1;">
+                <!-- Workspace Active Monitoring Ledger -->
+                <div id="report-panel" class="panel glow-bottom-right op-20" style="min-height: 200px;">
+                    <h2>🔬 Active Forensic Status Indicators</h2>
+                    <div id="forensicLedgerContainer" style="max-height: 260px; overflow-y: auto;"></div>
+                </div>
+
+                <!-- Telemetry Scrolling Terminal Output Log -->
+                <div class="panel glow-top-right op-20" id="workspace-action-zone">
+                    <h2>📟 Telemetry Live Trace Terminal</h2>
+                    <div id="local-log" class="log-box" style="height: 140px; overflow-y: auto; background: var(--bg-input); padding: 6px; border-radius: 4px; font-family: monospace; font-size: 11px;"></div>
+                </div>
+
+                <!-- Custom Ingestion Workspace Field -->
+                <div class="panel op-0" style="padding: 6px;">
+                    <label style="font-size:11px; margin-bottom:2px;">📋 Paste Ingestion JSON Struct Source:</label>
+                    <textarea id="jsonOutput" placeholder="Paste structural schema JSON arrays..." style="height: 100px; font-size:10px;" oninput="handleWorkspaceInputInversion()"></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    let archWidth = 32;
+    let masterStateBigInt = 0n;
+    let schemaMemoryCache = {};
+    let activeComponentKey = "existentialCore";
+
+    window.addEventListener("DOMContentLoaded", () => {
+        writeLogToPanel("Bootstrapping stateless low-power 128-bit shift registers...", "local-log");
+        document.getElementById('jsonOutput').value = JSON.stringify(getFallbackSymmetricalTemplate(), null, 4);
+        
+        setupInterlockingInputListeners();
+        setupIndustrialRotaryDialControl();
+        handleWorkspaceInputInversion();
+    });
+
+    function setupInterlockingInputListeners() {
+        const bindInputPort = (id, base, prefix) => {
+            document.getElementById(id).addEventListener('input', (e) => {
+                let text = e.target.value.trim();
+                if (prefix) text = text.replace(new RegExp('^' + prefix, 'i'), '');
+                let parsed = 0n;
+                try { 
+                    parsed = text === '' ? 0n : BigInt(base === 16 ? "0x" + text : base === 2 ? "0b" + text : base === 8 ? "0o" + text : text); 
+                } catch { parsed = 0n; }
+                
+                masterStateBigInt = parsed;
+                applyRegisterBoundaryMasks();
+                refreshMatrixWorkspaceDisplay(false); // Update without hijacking user cursor focus
+            });
+        };
+
+        bindInputPort('inputDec', 10, null);
+        bindInputPort('inputHex', 16, '0x');
+        bindInputPort('inputBin', 2, '0b');
+        bindInputPort('inputOct', 8, '0o');
+    }
+
+    function setupIndustrialRotaryDialControl() {
+        const dial = document.getElementById('archRotaryDial');
+        const widthTogglesList =;
+        let trackingIdx = 0;
+
+        dial.addEventListener('click', () => {
+            trackingIdx = (trackingIdx + 1) % widthTogglesList.length;
+            archWidth = widthTogglesList[trackingIdx];
+
+            // Physical spinning angle rotation transform vectors
+            dial.style.transform = `rotate(${trackingIdx * 90}deg)`;
+            document.getElementById('archKnobLabel').innerText = `WIDTH: ${archWidth}B`;
+            
+            applyRegisterBoundaryMasks();
+            refreshMatrixWorkspaceDisplay(true);
+            writeLogToPanel(`Analog Rotary Knob twisted. Execution restricted to [${archWidth}-bit] scope.`, "local-log");
+        });
+    }
+
+    function applyRegisterBoundaryMasks() {
+        const boundaryMask = (1n << BigInt(archWidth)) - 1n;
+        masterStateBigInt &= boundaryMask;
+    }
+
+    function handleWorkspaceInputInversion() {
+        try {
+            const rawText = document.getElementById('jsonOutput').value;
+            const parsed = JSON.parse(rawText);
+            if (!parsed || typeof parsed !== 'object') return;
+
+            schemaMemoryCache = parsed;
+            const discoveredKeys = Object.keys(schemaMemoryCache);
+            if (discoveredKeys.length > 0) {
+                activeComponentKey = discoveredKeys[0];
+            }
+            refreshMatrixWorkspaceDisplay(true);
+        } catch(e) {
+            // Silence exceptions while typing JSON tokens
+        }
+    }
+
+    function refreshMatrixWorkspaceDisplay(syncTextBoxes = true) {
+        const grid = document.getElementById('bitGrid');
+        grid.innerHTML = "";
+
+        const currentActiveSchema = schemaMemoryCache[activeComponentKey] || {};
+        const parsedBitIndexCache = {};
+
+        // Parse single-bit flags on the fly using power-of-two tests
+        Object.keys(currentActiveSchema).forEach(elementKey => {
+            const record = currentActiveSchema[elementKey];
+            if (!record.value) return;
+
+            const numericValue = BigInt(record.value);
+            const isSingleBitPower = numericValue > 0n && (numericValue & (numericValue - 1n)) === 0n;
+
+            if (isSingleBitPower) {
+                let bitOffsetIdx = 0; let tempValue = numericValue;
+                while (tempValue > 1n) { tempValue >>= 1n; bitOffsetIdx++; }
+                parsedBitIndexCache[bitOffsetIdx] = {
+                    key: elementKey,
+                    type: record.type || "BIT",
+                    comment: record.comment || record.legal || ""
+                };
+            }
+        });
+
+        // Loop backwards to keep proper High-to-Low order indexing layout representation
+        for (let i = archWidth - 1; i >= 0; i--) {
+            const cellNode = document.createElement('div');
+            const isOn = (masterStateBigInt & (1n << BigInt(i))) !== 0n;
+            const meta = parsedBitIndexCache[i];
+
+            let customTypeStyleClass = meta ? `type-${meta.type.toUpperCase()}` : '';
+            cellNode.className = `bit-cell ${isOn ? 'active' : ''} ${customTypeStyleClass}`;
+            cellNode.innerHTML = `<div>${isOn ? '1' : '0'}</div><div class="b-idx">${i}</div>`;
+            
+            if (meta) {
+                cellNode.title = `[${meta.type}] ${meta.key}\n${meta.comment}`;
+            }
+
+            cellNode.onclick = () => {
+                masterStateBigInt ^= (1n << BigInt(i));
+                applyRegisterBoundaryMasks();
+                refreshMatrixWorkspaceDisplay(true);
+                writeLogToPanel(`Direct Matrix click toggled bit index allocation: [${i}]`, "local-log");
+            };
+            grid.appendChild(cellNode);
+        }
+
+        if (syncTextBoxes) {
+            document.getElementById('inputDec').value = masterStateBigInt.toString(10);
+            document.getElementById('inputHex').value = "0x" + masterStateBigInt.toString(16).toUpperCase();
+            document.getElementById('inputBin').value = "0b" + masterStateBigInt.toString(2);
+            document.getElementById('inputOct').value = "0o" + masterStateBigInt.toString(8);
+        }
+
+        renderForensicLedgerReport(currentActiveSchema, parsedBitIndexCache);
+    }
+    function renderForensicLedgerReport(rawSchema, computedBitMap) {
+        const ledgerContainer = document.getElementById('forensicLedgerContainer');
+        ledgerContainer.innerHTML = "";
+
+        const listGroup = document.createElement('div');
+        listGroup.className = "list-group list-group-flush font-monospace";
+
+        let canaryFired = false;
+        let threatActive = false;
+
+        Object.keys(computedBitMap).forEach(idx => {
+            if (parseInt(idx) >= archWidth) return;
+            const record = computedBitMap[idx];
+            const isSet = (masterStateBigInt & (1n << BigInt(idx))) !== 0n;
+
+            if (isSet && record.type === 'CANARY') canaryFired = true;
+            if (isSet && record.type === 'THREAT') threatActive = true;
+
+            listGroup.innerHTML += `
+                <div class="list-group-item p-1.5 ${isSet ? 'bg-dark-subtle border-start border-3 border-success' : ''}" style="font-size:0.7rem; background: transparent; border-bottom:1px solid var(--border);">
+                    <div class="d-flex justify-content-between">
+                        <span class="text-primary fw-bold">BIT_${idx}: ${record.key}</span>
+                        <span class="badge bg-secondary badge-mono" style="font-size:9px; padding:1px 4px;">${record.type}</span>
+                    </div>
+                    <div class="text-muted small mt-0.5">${record.comment || 'No descriptions pre-loaded.'}</div>
+                </div>`;
+        });
+
+        // Evaluate composite multi-bit structures if present inside schema
+        Object.keys(rawSchema).forEach(elementKey => {
+            const dataItem = rawSchema[elementKey];
+            const rawVal = BigInt(dataItem.value);
+            const isSingleBit = rawVal > 0n && (rawVal & (rawVal - 1n)) === 0n;
+
+            if (!isSingleBit && rawVal !== 0n) {
+                const isSignatureMatched = (masterStateBigInt & rawVal) === rawVal;
+                if (isSignatureMatched && dataItem.type === 'CANARY') canaryFired = true;
+
+                listGroup.innerHTML += `
+                    <div class="list-group-item p-1.5 ${isSignatureMatched ? 'bg-dark-subtle border-start border-3 border-warning' : ''}" style="font-size:0.7rem; background: transparent; border-bottom:1px solid var(--border);">
+                        <div class="d-flex justify-content-between">
+                            <span class="text-warning fw-bold">💥 SIGNATURE: ${elementKey}</span>
+                            <span class="badge bg-dark text-warning border border-warning" style="font-size:9px; padding:1px 4px;">${dataItem.type || 'COMPOSITE'}</span>
+                        </div>
+                        <div class="text-muted small mt-0.5">${dataItem.comment || dataItem.legal || ''}</div>
+                    </div>`;
+            }
+        });
+
+        // Fire dynamic cross-coloring states based on Voet's custom rule guidelines
+        const targetColorState = canaryFired ? "red" : threatActive ? "orange" : "green";
+        const targetMessageText = canaryFired ? "CRITICAL_CANARY_PANIC" : threatActive ? "THREAT_VECTOR_ENGAGED" : "MATRIX_NOMINAL_STABLE";
+        
+        setVisualLedStatus(targetColorState, targetMessageText);
+
+        if (listGroup.children.length === 0) {
+            ledgerContainer.innerHTML = `<p class="text-muted text-center small pt-3">No metadata mappings located inside current active scope.</p>`;
+        } else {
+            ledgerContainer.appendChild(listGroup);
+        }
+    }
+
+    // --- LEGACY TELEMETRY LOG CORE HANDLERS LINKED DIRECTLY FROM dirty_tele.js ---
+    function writeLogToPanel(msg, targetBoxId = "local-log") {
+        const timestamp = new Date().toISOString().replace('T', ' ').substring(0, 19);
+        const logBox = document.getElementById(targetBoxId);
+        if (logBox) {
+            logBox.innerHTML += `[${timestamp}] ${msg}<br/>`;
+            logBox.scrollTop = logBox.scrollHeight;
+        }
+    }
+
+    function setVisualLedStatus(color, labelText, primaryLedId = "status-led", statusTextId = "status-text") {
+        const led = document.getElementById(primaryLedId);
+        const text = document.getElementById(statusTextId);
+        const colorHexMap = { "green": "#3fb950", "orange": "#d29922", "red": "#f85149", "blue": "#2f81f7", "yellow": "#f1e05a", "pink": "#ff79c6" };
+        
+        if (led) {
+            led.className = "led-fixture fx-round fx-matte fx-shiny fx-wave br-high";
+            led.classList.add("led-c-" + color);
+            if (color === "red" || color === "orange") led.classList.add("led-blink");
+        }
+        if (text) {
+            text.innerHTML = labelText;
+            text.style.color = colorHexMap[color] || "#e1e7f0";
+        }
+        
+        // Broadcast proximity border color glow shifts across panel containers concurrently
+        const panelsList = ["configuration-workspace", "panel-box-4", "workspace-action-zone", "report-panel"];
+        panelsList.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                const cleanClasses = Array.from(el.classList).filter(c => !c.startsWith("state-"));
+                el.className = cleanClasses.join(" ") + " state-" + color;
+            }
+        });
+    }
+
+    // --- HARDCODED BITWISE SHIFT CORE ROUTINES ---
+    function executeShiftLeft() { masterStateBigInt <<= 1n; applyRegisterBoundaryMasks(); refreshMatrixWorkspaceDisplay(true); }
+    function executeShiftRight() { masterStateBigInt >>= 1n; refreshMatrixWorkspaceDisplay(true); }
+    function executeInvertNot() { masterStateBigInt = ~masterStateBigInt; applyRegisterBoundaryMasks(); refreshMatrixWorkspaceDisplay(true); }
+    function executeFillAll() { masterStateBigInt = (1n << BigInt(archWidth)) - 1n; refreshMatrixWorkspaceDisplay(true); }
+    function executeClearAll() { masterStateBigInt = 0n; refreshMatrixWorkspaceDisplay(true); writeLogToPanel("Registers purged back to base zero fields.", "local-log"); }
+
+    function getFallbackSymmetricalTemplate() {
+        return {
+            "existentialCore": {
+                "EXISTENCE": { "value": "1", "expr": "1 << 0", "type": "PILLAR", "comment": "You, alive, with a body" },
+                "AUTONOMY": { "value": "2", "expr": "1 << 1", "type": "PILLAR", "comment": "The Sovereign Right to Choose" },
+                "INTEGRITY": { "value": "4", "expr": "1 << 2", "type": "PILLAR", "comment": "The Moral Axis of Personal Choice" },
+                "CANARY_1_SOVEREIGN": { "value": "8", "expr": "1 << 3", "type": "CANARY", "comment": "WATCHDOG_SOVEREIGN" },
+                "DISABILITY": { "value": "64", "expr": "1 << 6", "type": "PILLAR", "comment": "Nature's way of checks and balances" },
+                "CANARY_S_STATE": { "value": "89130487", "expr": "0x055005f7", "type": "CANARY", "comment": "Sovereign State Validation Matcher" }
+            }
+        };
+    }
+</script>
+</body>
+</html>
+  
