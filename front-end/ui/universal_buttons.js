@@ -1,0 +1,130 @@
+/** 
+ * * UI BUTTONS v0.1
+ *** Quick-n-Dirty Buttons            VisualMIX/front_end/ui/dirty_buttons.js
+ ** (c)2006-2012 Gunther Voet
+**/
+
+.ha-switch-container {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    user-select: none;
+    margin: 8px 0;
+}
+
+.ha-switch-track {
+    width: 44px;
+    height: 22px;
+    background: var(--red);
+    border-radius: 12px;
+    position: relative;
+    transition: background 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid rgba(255,255,255,0.05);
+}
+
+.ha-switch-thumb {
+    width: 16px;
+    height: 16px;
+    background: #ffffff;
+    border-radius: 50%;
+    position: absolute;
+    top: 2px;
+    left: 3px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ha-switch-container.active .ha-switch-track {
+    background: var(--green); /* Active On State: True Grid Light Green */
+}
+
+.ha-switch-container.active .ha-switch-thumb {
+    transform: translateX(20px);
+}
+
+/* ==========================================================================
+   2. Backlit Halo Tactile Buttons (Ring-Light Button Fixtures)
+   ========================================================================== */
+.halo-btn {
+    background: #1c2128;
+    color: var(--text);
+    border: 2px solid var(--border);
+    border-radius: 50%;
+    width: 52px;
+    height: 52px;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    position: relative;
+    font-weight: bold;
+    font-size: 11px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Dynamic Halo Rim Backlight Toggles */
+.halo-btn::before {
+    content: ""; position: absolute; top: -4px; left: -4px; right: -4px; bottom: -4px;
+    border-radius: 50%; border: 2px solid transparent; opacity: 0.3;
+    transition: all 0.25s ease;
+}
+
+.halo-btn.hl-green::before  { border-color: var(--green); }
+.halo-btn.hl-blue::before   { border-color: var(--blue); }
+.halo-btn.hl-pink::before   { border-color: var(--pink); }
+.halo-btn.hl-yellow::before { border-color: #f1e05a; }
+
+.halo-btn:hover {
+    background: #22272e;
+    transform: scale(1.04);
+}
+
+.halo-btn:active {
+    transform: scale(0.96);
+}
+
+.halo-btn.active::before {
+    opacity: 1;
+    filter: drop-shadow(0 0 6px currentColor);
+}
+
+/* ==========================================================================
+   3. Industrial Analog Rotary Turning Knobs
+   ========================================================================== */
+.rotary-knob-wrapper {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    width: 80px;
+}
+
+.rotary-dial {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, #2d333b 0%, #1c2128 100%);
+    border: 2px solid var(--border);
+    border-radius: 50%;
+    position: relative;
+    cursor: grab;
+    box-shadow: inset 0 2px 4px rgba(255,255,255,0.05), 0 4px 8px rgba(0,0,0,0.4);
+    transform: rotate(0deg);
+    transition: transform 0.1s linear;
+}
+
+.rotary-pointer {
+    width: 3px;
+    height: 14px;
+    background: #ff79c6; /* High-contrast pink index line locator pointer ticker */
+    position: absolute;
+    top: 4px;
+    left: calc(50% - 1.5px);
+    border-radius: 1px;
+    transform-origin: bottom center;
+}
+
+.rotary-dial:active {
+    cursor: grabbing;
+}
