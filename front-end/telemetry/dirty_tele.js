@@ -1,5 +1,5 @@
 /** 
- * * TELEMETRY ROUTINES v0.3
+ * * TELEMETRY ROUTINES v0.7a
  *** Quick-n-Dirty Telemetry            VisualMIX/front_end/telemetry/dirty_tele.js
  ** (c)2006-2012 Gunther Voet
 **/
