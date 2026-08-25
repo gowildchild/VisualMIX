@@ -68,13 +68,11 @@ function toggleSourceInterfaceVisibility(panelType) {
     if (panelType === 'meta') {
         const mode = document.getElementById("meta-source-select").value;
         localStorage.setItem("cache_meta_source_mode", mode);
-        document.getElementById("meta-url-container").className = (mode === "URL") ? "panel" : "hidden-node";
-        document.getElementById("meta-input-container").className = (mode === "MANUAL") ? "panel" : "hidden-node";
+        writeLogToPanel(`Meta source selector adjusted manually to: ${mode}`);
     } else if (panelType === 'source') {
         const mode = document.getElementById("test-source-select").value;
         localStorage.setItem("cache_test_source_mode", mode);
-        document.getElementById("test-url-container").className = (mode === "URL") ? "panel" : "hidden-node";
-        document.getElementById("test-input-container").className = (mode === "MANUAL") ? "panel" : "hidden-node";
+        writeLogToPanel(`Source blueprint selector adjusted manually to: ${mode}`);
     }
 }
 
@@ -185,12 +183,19 @@ function evaluateWorkspaceState(metaJson, testJson) {
     currentAlgo = profile.selected_algorithm || "md5";
     metaRegistryName = profile.target_registry_key || "CHECKSUM_HASH_REGISTRY";
     
-    // Sync bitmask evaluation policy constraints
     applyBitmaskPolicyConstraints(profile.options || {});
     
-    document.getElementById("algo-select").value = currentAlgo;
-    document.getElementById('file-status').innerHTML = `✅ Ready. Synced using variant: [${currentAlgo.toUpperCase()}]`;
-    document.getElementById('workspace-action-zone').className = "action-grid";
+    const algoSel = document.getElementById("algo-select");
+    const statusEl = document.getElementById('file-status');
+    const actionPanel = document.getElementById('workspace-action-zone');
+    
+    if (algoSel) algoSel.value = currentAlgo;
+    if (statusEl) statusEl.innerHTML = `✅ Ready. Engine synced using variant: [${currentAlgo.toUpperCase()}]`;
+    if (actionPanel) actionPanel.className = "action-grid"; 
+    
+    // 🔑 FIXED: Force the source text areas to stay visible on the screen for physical side-by-side verification!
+    document.getElementById("meta-input-container").className = "panel";
+    document.getElementById("test-input-container").className = "panel";
     
     setVisualLedStatus("green", "Ready to Verify");
     generateAndShowChallenge();
@@ -200,17 +205,18 @@ function applyBitmaskPolicyConstraints(optionsBlock) {
     const bitmaskString = optionsBlock.bitmask || optionsBlock.default?.bitmask || "0x00000000";
     const maskVal = parseInt(bitmaskString, 16);
     
-    // Parse individual bytes using bitwise right shifts and masks
-    const byte0_meta   = maskVal & 0xFF;
+    const byte0_meta = maskVal & 0xFF;
     
-    // Policy rule: If Byte 0 is completely zero, lock the configuration dashboard panels out
     if (byte0_meta === 0) {
         writeLogToPanel("🚨 SECURITY POLICY NOTICE: Access blocked by active bitmask decree.");
         setVisualLedStatus("red", "Access Denied");
         document.getElementById('workspace-action-zone').className = "hidden-node";
+        return;
     }
     
-    // Populate selectors natively out of the options profile array variables inside your manifest
+    populateDynamicDropdown("meta-source-select", optionsBlock.meta || ["JSON", "URL", "INPUT", "DIRECT"]);
+    populateDynamicDropdown("test-source-select", optionsBlock.source || ["JSON_FILE", "URL", "INPUT", "DIRECT"]);
+    
     populateDynamicDropdown("action-strategy-select", optionsBlock.action || ["CHALLENGE", "INTEGRITY"]);
     populateDynamicDropdown("check-syntax-select", optionsBlock.check || ["MD5:CATEGORY_A"]);
 }
