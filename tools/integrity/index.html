@@ -118,67 +118,69 @@
 
         </div>
 
-        <!-- ⚙️ Hardware Telemetry Diagnostics & Calibration Drawer Panel -->
-        <div class="panel" style="margin-top: 15px;">
-            <h2>🛠️ VisualMIX Cockpit Calibration Controller</h2>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 8px;">
-                <div>
-                    <label>LED Indicator Glass Fixture Geometry:</label>
-                    <select id="ctrl-led-fixture" onchange="applyLiveTelemetryCalibration()">
-                        <option value="fx-round fx-shiny">Round Lens Gloss Glare</option>
-                        <option value="fx-round fx-matte">Round Matte Solid Core</option>
-                        <option value="fx-round fx-shiny fx-wave">Round Shiny + Light Wave Ripple</option>
-                        <option value="fx-rect fx-matte">Rectangular Matte Dashboard Slot</option>
-                        <option value="fx-rect fx-shiny">Rectangular Shiny Indicator Glass</option>
-                    </select>
-                </div>
-                <div>
-                    <label>LED Core Telemetry Activity Loop:</label>
-                    <select id="ctrl-led-blink" onchange="applyLiveTelemetryCalibration()">
-                        <option value="static">Static Continuous Solid Trace</option>
-                        <option value="led-blink">Blinking Intermittent Alert Pulse</option>
-                    </select>
-                </div>
-                <div>
-                    <label>LED Diode Luminous Flux (Brightness):</label>
-                    <select id="ctrl-led-bright" onchange="applyLiveTelemetryCalibration()">
-                        <option value="br-low">Low (Dim Ambient Stealth)</option>
-                        <option value="br-med" selected>Medium (Standard Baseline Nominal)</option>
-                        <option value="br-high">High (Bright Emissive Glare)</option>
-                        <option value="br-ultra">Ultra (Max Intensity Laser Bleed)</option>
-                    </select>
-                </div>
-                <div>
-                    <label>Workspace Panels Baseline Isolation Density (Opacity):</label>
-                    <select id="ctrl-panel-op" onchange="applyLiveTelemetryCalibration()">
-                        <option value="op-0">Opaque (100% Solid Boundary)</option>
-                        <option value="op-20" selected>Translucent Glass (80% Density Profile)</option>
-                        <option value="op-40">Deep Sheer Mesh (60% Density Profile)</option>
-                    </select>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 15px; margin-top: 15px;">
+            
+            <!-- LEFT ENGINE CELL: Hardware Calibration Settings Panel -->
+            <div class="panel" id="cockpit-calibration-panel">
+                <h2>🛠️ Console Calibration Matrix</h2>
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <div>
+                        <label>LED Indicator Glass Fixture Geometry:</label>
+                        <select id="ctrl-led-fixture" onchange="applyLiveTelemetryCalibration()" style="width: 100%;">
+                            <option value="fx-round fx-shiny">Round Lens Gloss Glare</option>
+                            <option value="fx-round fx-matte">Round Matte Solid Core</option>
+                            <option value="fx-round fx-shiny fx-wave">Round Shiny + Light Wave Ripple</option>
+                            <option value="fx-rect fx-matte">Rectangular Matte Dashboard Slot</option>
+                            <option value="fx-rect fx-shiny">Rectangular Shiny Indicator Glass</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>LED Core Telemetry Activity Loop:</label>
+                        <select id="ctrl-led-blink" onchange="applyLiveTelemetryCalibration()" style="width: 100%;">
+                            <option value="static">Static Continuous Solid Trace</option>
+                            <option value="led-blink">Blinking Intermittent Alert Pulse</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>LED Diode Luminous Flux (Brightness):</label>
+                        <select id="ctrl-led-bright" onchange="applyLiveTelemetryCalibration()" style="width: 100%;">
+                            <option value="br-low">Low (Dim Ambient Stealth)</option>
+                            <option value="br-med" selected>Medium (Standard Baseline Nominal)</option>
+                            <option value="br-high">High (Bright Emissive Glare)</option>
+                            <option value="br-ultra">Ultra (Max Intensity Laser Bleed)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Workspace Panels Baseline Isolation Density (Opacity):</label>
+                        <select id="ctrl-panel-op" onchange="applyLiveTelemetryCalibration()" style="width: 100%;">
+                            <option value="op-0">Opaque (100% Solid Boundary)</option>
+                            <option value="op-20" selected>Translucent Glass (80% Density Profile)</option>
+                            <option value="op-40">Deep Sheer Mesh (60% Density Profile)</option>
+                        </select>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- System Diagnostic Log Panel -->
-        <div class="panel">
-            <h2>System Debug Diagnostic Execution Log</h2>
-            <div id="local-log" class="log-box"></div>
-            <div style="display:flex; justify-content:space-between; align-items: center; gap:10px; flex-wrap: wrap;">
-                <div style="display:flex; gap:8px;">
-                    <button onclick="document.getElementById('local-log').innerHTML='';" class="secondary" style="padding: 4px 8px; font-size:11px;">Flush View Logs</button>
-                    <button class="danger" onclick="executeFactoryResetPurge()" style="padding: 4px 8px; font-size:11px;">Purge Storage</button>
-                </div>
-                <div style="display:flex; align-items:center; gap:8px;">
-                    <label style="margin:0;">Selected Hashing Variant:</label>
-                    <select id="algo-select" onchange="handleManualAlgoOverride()" style="margin:0; width:160px;">
-                        <option value="md5">MD5 (Fast / Verified)</option>
-                        <option value="sha1">SHA-1 (Legacy)</option>
-                        <option value="sha256">SHA-256 (Secure)</option>
-                    </select>
+            <!-- RIGHT ENGINE CELL: Un-Bloated Scrolling Debug System Log Panel -->
+            <div class="panel" id="system-log-display-container">
+                <h2>System Debug Diagnostic Execution Log</h2>
+                <div id="local-log" class="log-box" style="height: 180px; overflow-y: auto; background: var(--bg-input); padding: 8px; border-radius: 4px; font-family: monospace; font-size: 11px; margin-bottom: 8px;"></div>
+                <div style="display:flex; justify-content:space-between; align-items: center; gap:10px; flex-wrap: wrap; margin-top: auto;">
+                    <div style="display:flex; gap:8px;">
+                        <button onclick="document.getElementById('local-log').innerHTML='';" class="secondary" style="padding: 4px 8px; font-size:11px;">Flush View Logs</button>
+                        <button class="danger" onclick="executeFactoryResetPurge()" style="padding: 4px 8px; font-size:11px;">Purge Storage</button>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <label style="margin:0; font-size:11px;">Core Hashing Core:</label>
+                        <select id="algo-select" onchange="handleManualAlgoOverride()" style="margin:0; width:110px; font-size:11px; padding: 2px;">
+                            <option value="md5">MD5</option>
+                            <option value="sha1">SHA-1</option>
+                            <option value="sha256">SHA-256</option>
+                        </select>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 </body>
 </html>
           
