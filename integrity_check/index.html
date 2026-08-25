@@ -30,8 +30,7 @@
             <div style="font-size: 11px; color: var(--text-muted);" id="file-status">Initializing memory caches...</div>
         </div>
 
-        <!-- Master Two-Column Operational Layout Grid Workspace -->
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 15px;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 15px;">
             
             <!-- LEFT FLANK PANELS FRAME: Inputs and Check Intercept Boxes -->
             <div style="display: flex; flex-direction: column; gap: 15px;">
@@ -85,7 +84,7 @@
                     </div>
                 </div>
 
-                <!-- 🧩 Box 4: THE CHECK BOX clipboard validator panel (Cleaned of extra fields) -->
+                <!-- 🧩 Box 4: THE CHECK BOX clipboard validator panel -->
                 <div class="panel">
                     <h2>4. Session Token Intercept Check</h2>
                     <label>Pasted Clipboard Session Intercept Snapshot Container Area:</label>
@@ -94,7 +93,27 @@
                 </div>
             </div>
 
-        <!-- System Diagnostic Log & Engine Controls Panel -->
+            <!-- RIGHT FLANK PANELS FRAME: Challenges and Live Metrics Output -->
+            <div style="display: flex; flex-direction: column; gap: 15px;">
+                <!-- 🧩 Box 3: CHALLENGE/ACTION output box panel -->
+                <div class="panel" id="workspace-action-zone">
+                    <h2>3. Verification Challenge Output</h2>
+                    <label>Target Execution Strategy Action Selector:</label>
+                    <select id="action-strategy-select" onchange="handleActionStrategySwap()"></select>
+                    <label>Active Copypaste Buffer Code Vector Prompt String:</label>
+                    <textarea id="challenge-output" readonly onclick="this.select()" style="height: 184px; background: var(--bg-input); font-size:11px;"></textarea>
+                </div>
+
+                <!-- 🧩 Real-Time Metrics Panel -->
+                <div id="report-panel" class="panel" style="background: var(--bg-input); min-height: 232px;">
+                    <h2>🔬 Dynamic Baseline Local Metrics Ledger</h2>
+                    <p style="color: var(--text-muted); font-style: italic; text-align: center; margin-top: 60px;">Awaiting baseline file parsing loops to render verification metrics...</p>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- System Diagnostic Log Panel -->
         <div class="panel">
             <h2>System Debug Diagnostic Execution Log</h2>
             <div id="local-log" class="log-box"></div>
