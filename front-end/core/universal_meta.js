@@ -1,5 +1,5 @@
 /**
- * VISUALMIX CORE - META
+ * VISUALMIX CORE - META v0.0.7a
  * (c)2007-2012 Gunther Voet | Universal Decoupled Logic Core
  * Location: front_end/core/universal_meta.js
  */
@@ -7,6 +7,7 @@
 let metaConfig = null;
 let masterConfig = null;
 let currentAlgo = "md5";
+let visualmix_metaver = "v0.0.7a";
 let metaRegistryName = "CHECKSUM_HASH_REGISTRY";
 
 const DEFAULT_META_URL = "https://raw.githubusercontent.com/gowildchild/VisualMIX/refs/heads/main/tools/integrity/universal_meta.json";
