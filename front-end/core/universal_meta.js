@@ -8,8 +8,8 @@ let masterConfig = null;
 let currentAlgo = "md5";
 let metaRegistryName = "CHECKSUM_HASH_REGISTRY";
 
-const DEFAULT_META_URL = "https://raw.githubusercontent.com/gowildchild/VisualMIX/refs/heads/main/integrity_check/universal_meta.json";
-const DEFAULT_TEST_URL = "https://raw.githubusercontent.com/gowildchild/VisualMIX/refs/heads/main/integrity_check/universal_test.json";
+const DEFAULT_META_URL = "https://raw.githubusercontent.com/gowildchild/VisualMIX/refs/heads/main/tools/integrity/universal_meta.json";
+const DEFAULT_TEST_URL = "https://raw.githubusercontent.com/gowildchild/VisualMIX/refs/heads/main/tools/integrity/universal_test.json";
 
 window.onload = function() {
     writeLogToPanel("Initializing zero-trust asynchronous persistent cache engines...");
