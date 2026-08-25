@@ -1,5 +1,5 @@
 {
-    "UNIVERSAL_BITS": {
+    "UNIVERSAL_META_BITS": {
         "BIT-CLEAR":              {"value": 0,          "expr": "0",          "type": "PRESET",  "group":"PRESET",     "comment": "ALL OFF"},
         "BIT-ON":                 {"value": 4294967295, "expr": "0xFFFFFFFF", "type": "DEFAULT", "group":"PRESET",     "comment": "ALL ON"},
         "BIT-0":                  {"value": 1,          "expr": "0",          "type": "BIT",     "group":"BYTE-0",     "comment": "BIT-0 toggle"},
