@@ -1,3 +1,8 @@
+////////////////////
+// VisualMIX Meta Java v0.0.3     
+// (c)2007-2026 by Gunther Voet
+   ////////////////////////////// 
+
 let metaConfig = null;
 let masterConfig = null;
 let currentAlgo = "md5";
