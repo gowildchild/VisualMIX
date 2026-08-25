@@ -1,5 +1,5 @@
 /**
- * 🗺️ UNIVERSAL ENGINE: TEMPLATES & LANGUAGES v0.1
+ * 🗺️ UNIVERSAL ENGINE: TEMPLATES & LANGUAGES v0.0.6
  * Dynamic Multi-Language Layout Router & Template Ingestion Matrix
  * (c)2006-2012 Gunther Voet | VisualMIX/front-end/ui/engine_templates.js
  */
