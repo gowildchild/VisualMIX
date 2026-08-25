@@ -32,15 +32,6 @@ window.onload = function() {
     triggerRemoteUrlFetchSync();
 };
 
-function writeLogToPanel(msg) {
-    const timestamp = new Date().toISOString().replace('T', ' ').substring(0, 19);
-    const logBox = document.getElementById("local-log");
-    if (logBox) {
-        logBox.innerHTML += `[${timestamp}] ${msg}<br/>`;
-        logBox.scrollTop = logBox.scrollHeight;
-    }
-}
-
 function initializeStaticDropdownMenus() {
     // Populate standard choices dynamically so the UI stays responsive before json completes loading
     const metaSelect = document.getElementById("meta-source-select");
@@ -64,10 +55,6 @@ function initializeStaticDropdownMenus() {
     }
 }
 
-/**
- * 🛠️ Dynamic Panel Node Visibility Router Matrix
- * Handles stable layout state updates and prevents panels from disappearing.
- */
 function togglePanelNodeVisibility(panelType) {
     if (panelType === 'meta') {
         const mode = document.getElementById("meta-source-select").value;
@@ -97,7 +84,6 @@ function togglePanelNodeVisibility(panelType) {
 
         if (urlField && inputField) {
             urlField.className = (mode === "URL") ? "panel" : "hidden-node";
-            // 🔑 FIXED: Ensures container class stays rendered as a valid panel on fallback selection swaps
             inputField.className = (mode === "INPUT") ? "panel" : "panel";
         }
 
@@ -107,11 +93,6 @@ function togglePanelNodeVisibility(panelType) {
     }
 }
 
-/**
- * 🔑 FIXED: Cascade Cross-Loader Gateway Action Handlers
- * When the Action box switches between CHALLENGE and INTEGRITY, this instantly alters 
- * your Box 2 defaults and triggers an immediate updated configuration file fetch.
- */
 function handleActionStrategySwap() {
     const activeStrategy = document.getElementById("action-strategy-select").value;
     const testSourceSelect = document.getElementById("test-source-select");
@@ -127,14 +108,12 @@ function handleActionStrategySwap() {
         localStorage.setItem("cache_test_source_mode", testSourceSelect.value);
     }
     
-    // Fire immediate data fetch sync pass to update the active schema matrices
     triggerRemoteUrlFetchSync();
 }
 
 function toggleSourceInterfaceVisibility(panelType) {
     togglePanelNodeVisibility(panelType);
 }
-
 
 function syncPanelData(panelType) {
     writeLogToPanel(`Sync event triggered for target panel: ${panelType}`);
@@ -179,15 +158,6 @@ function triggerRemoteUrlFetchSync() {
             const statusEl = document.getElementById('file-status');
             if (statusEl) statusEl.innerHTML = "⚠️ Configuration synchronization dropped. Manual text fallback active.";
         });
-}
-
-function setVisualLedStatus(color, labelText) {
-    const led = document.getElementById("status-led");
-    const text = document.getElementById("status-text");
-    if (!led || !text) return;
-    led.className = "led-indicator led-" + color;
-    text.innerHTML = labelText;
-    text.style.color = color === "green" ? "#3fb950" : (color === "orange" ? "#d29922" : "#f85149");
 }
 
 function handleTypingState(panelType) {
@@ -310,18 +280,6 @@ function generateAndShowChallenge() {
     document.getElementById('challenge-output').value = JSON.stringify(challenge, null, 2);
 }
 
-function exportSettingsJsonFile() {
-    if (!metaConfig) return;
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(metaConfig, null, 2));
-    const downloadAnchor = document.createElement('a');
-    downloadAnchor.setAttribute("href", dataStr);
-    downloadAnchor.setAttribute("download", "check_integrity_meta_backup.json");
-    document.body.appendChild(downloadAnchor);
-    downloadAnchor.click();
-    downloadAnchor.remove();
-    writeLogToPanel("Exported configuration profile JSON settings file successfully.");
-}
-
 function executeCryptographicVerificationDiff() {
     const inputArea = document.getElementById('session-input').value.trim();
     const reportPanel = document.getElementById('report-panel');
@@ -346,7 +304,6 @@ function executeCryptographicVerificationDiff() {
         return longKey.replace("CATEGORY_", "").split("_")[0];
     }
 
-    // 🔍 Built-In Line & Character Position Delta Interrogator
     function computeDetailedTextDiff(expectedStr, incomingStr) {
         let expLines = expectedStr.split("\n");
         let incLines = incomingStr.split("\n");
@@ -440,7 +397,6 @@ function executeCryptographicVerificationDiff() {
     if (codeDiffs) htmlReport += "<h2>🚨 LINE-LEVEL SYNTAX GAP DELTAS</h2>" + codeDiffs;
 
     if (!overallPassed) {
-        // Output code fixes precisely generated with your configuration registry profile title
         let fixedRegistry = `    "${metaRegistryName}": {\n`;
         categories.forEach((k, idx) => {
             let shortKey = getCleanShortKey(k);
@@ -471,10 +427,7 @@ function evaluateWorkspaceState(metaJson, testJson) {
     if (algoSel) algoSel.value = currentAlgo;
     if (statusEl) statusEl.innerHTML = `✅ Configuration Synced. Local system vectors active.`;
     
-    // Explicitly lock onto tab meta view at startup footprint
     switchConfigurationTab('meta');
-    
-    // Draw your requested initial ledger states side-by-side instantly 
     renderInitialBaselineMetricsLedger();
     setVisualLedStatus("green", "Ready to Verify");
     generateAndShowChallenge();
