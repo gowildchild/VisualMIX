@@ -1,0 +1,778 @@
+
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bitwise Translator | BiTSHAFT | VisualMIX</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --bit-box-size: 38px;
+        }
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .bit-matrix-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(var(--bit-box-size), 1fr));
+            gap: 4px;
+            max-width: 100%;
+        }
+        @media (min-width: 1400px) {
+            .bit-matrix-row {
+                grid-template-columns: repeat(32, 1fr);
+            }
+        }
+        .bit-cell {
+            height: 52px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 4px 2px;
+            border: 1px solid var(--bs-border-color);
+            border-radius: 4px;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.15s ease-in-out;
+            font-size: 0.75rem;
+        }
+        .bit-cell:hover {
+            background-color: var(--bs-secondary-bg);
+        }
+        .bit-cell.active-bit {
+            background-color: var(--bs-primary);
+            color: #fff;
+            border-color: var(--bs-primary-border-subtle);
+        }
+        .bit-cell.checkbit-node {
+            border: 2px dashed var(--bs-warning);
+        }
+        .bit-cell.checkbit-node.active-bit {
+            background-color: var(--bs-warning);
+            color: #000;
+            border-color: var(--bs-warning);
+        }
+        .bit-val {
+            font-weight: bold;
+            font-size: 0.95rem;
+        }
+        .bit-idx {
+            opacity: 0.65;
+            font-size: 0.65rem;
+        }
+        .input-group-text-fixed {
+            width: 55px;
+            justify-content: center;
+            font-weight: bold;
+        }
+        .byte-badge {
+            font-family: monospace;
+            font-size: 0.85rem;
+        }
+        .history-list-item {
+            cursor: pointer;
+            font-family: monospace;
+            font-size: 0.8rem;
+        }
+        .history-list-item:hover {
+            background-color: var(--bs-secondary-bg);
+        }
+        .copy-btn {
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="bg-body text-body py-4">
+
+<div class="container-xl">
+    <!-- Header Controls -->
+    <header class="d-flex flex-wrap justify-content-between align-items-center pb-3 mb-4 border-bottom">
+        <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-cpu text-primary fs-3"></i>
+            <h1 class="h3 mb-0 fw-bold">Bitwise Testground</h1>
+        </div>
+        <div class="d-flex align-items-center gap-3 mt-2 mt-sm-0">
+            <!-- Architecture Select -->
+            <div class="input-group input-group-sm">
+                <span class="input-group-text"><i class="bi bi-gear-fill"></i></span>
+                <select id="archSelect" class="form-select" style="width: 120px;">
+                    <option value="8">8-bit</option>
+                    <option value="16">16-bit</option>
+                    <option value="32" selected>32-bit</option>
+                    <option value="48">48-bit</option>
+                    <option value="64">64-bit</option>
+                    <option value="128">128-bit</option>
+                    <option value="256">256-bit</option>
+                </select>
+            </div>
+            <!-- Theme Toggle -->
+            <button id="themeToggleBtn" class="btn btn-outline-secondary btn-sm" title="Toggle Theme">
+                <i id="themeIcon" class="bi bi-moon-stars-fill"></i>
+            </button>
+        </div>
+    </header>
+
+    <div class="row g-4">
+        <!-- Main Panel: Inputs, Matrix, and Base Conversions -->
+        <div class="col-lg-9">
+            
+            <!-- Global Action Bar -->
+            <div class="card mb-4 shadow-sm border-0 bg-body-tertiary">
+                <div class="card-body d-flex flex-wrap gap-2 justify-content-between align-items-center py-2">
+                    <div class="d-flex flex-wrap gap-2">
+                        <button class="btn btn-sm btn-primary" onclick="executeShift('left')"><i class="bi bi-arrow-left"></i> Shift Left (&lt;&lt;)</button>
+                        <button class="btn btn-sm btn-primary" onclick="executeShift('right')"><i class="bi bi-arrow-right"></i> Shift Right (&gt;&gt;)</button>
+                        <button class="btn btn-sm btn-secondary" onclick="executeInvert()"><i class="bi bi-arrow-left-right"></i> Invert (~)</button>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2">
+                        <div class="form-check form-switch d-flex align-items-center me-2" title="Automatically sets checkbits if their trigger flags are active (IntFlag Rule)">
+                            <input class="form-check-input me-2" type="checkbox" id="intFlagRuleCheck" checked>
+                            <label class="form-check-label small fw-bold text-warning" for="intFlagRuleCheck">IntFlag Rule Automations</label>
+                        </div>
+                        <button class="btn btn-sm btn-success" onclick="executeSetAll()"><i class="bi bi-check-all"></i> Set All</button>
+                        <button class="btn btn-sm btn-danger" onclick="executeClearAll()"><i class="bi bi-x-circle"></i> Clear All</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Radix Synchronized Input Conversion Grid -->
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header bg-body-secondary py-2 fw-semibold small">Synchronized Radix Converter & Multi-Base Input</div>
+                <div class="card-body">
+                    <div class="row g-2">
+                        <!-- DEC -->
+                        <div class="col-md-6 col-xl-3">
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text input-group-text-fixed bg-primary-subtle text-primary">DEC</span>
+                                <input type="text" id="inputDec" class="form-control font-monospace" placeholder="0">
+                                <button class="btn btn-outline-secondary copy-btn" onclick="copyToClipboard('inputDec')" title="Copy"><i class="bi bi-clipboard"></i></button>
+                            </div>
+                        </div>
+                        <!-- HEX -->
+                        <div class="col-md-6 col-xl-3">
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text input-group-text-fixed bg-success-subtle text-success">HEX</span>
+                                <input type="text" id="inputHex" class="form-control font-monospace" placeholder="0x0">
+                                <button class="btn btn-outline-secondary copy-btn" onclick="copyToClipboard('inputHex')" title="Copy"><i class="bi bi-clipboard"></i></button>
+                            </div>
+                        </div>
+                        <!-- BIN -->
+                        <div class="col-md-6 col-xl-3">
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text input-group-text-fixed bg-info-subtle text-info">BIN</span>
+                                <input type="text" id="inputBin" class="form-control font-monospace" placeholder="0b0">
+                                <button class="btn btn-outline-secondary copy-btn" onclick="copyToClipboard('inputBin')" title="Copy"><i class="bi bi-clipboard"></i></button>
+                            </div>
+                        </div>
+                        <!-- OCT -->
+                        <div class="col-md-6 col-xl-3">
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text input-group-text-fixed bg-warning-subtle text-warning">OCT</span>
+                                <input type="text" id="inputOct" class="form-control font-monospace" placeholder="0o0">
+                                <button class="btn btn-outline-secondary copy-btn" onclick="copyToClipboard('inputOct')" title="Copy"><i class="bi bi-clipboard"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bit Interactive Canvas Matrix Grid -->
+            <div id="bitMatrixContainer">
+                <!-- Dynamically generated rows of max 32 bits grouped neatly -->
+            </div>
+
+            <!-- Individual Isolated Byte Fields Calculations -->
+            <div class="card shadow-sm mt-4">
+                <div class="card-header bg-body-secondary py-2 fw-semibold small d-flex justify-content-between align-items-center">
+                    <span>Isolated Byte Fields Decomposition</span>
+                    <span class="badge bg-secondary font-monospace" id="byteCountBadge">4 Bytes</span>
+                </div>
+                <div class="card-body p-2">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-bordered text-center align-middle mb-0 font-monospace small">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Byte Index</th>
+                                    <th>Bit Scope Range</th>
+                                    <th>Binary Segment</th>
+                                    <th>Hex value</th>
+                                    <th>Dec value</th>
+                                </tr>
+                            </thead>
+                            <tbody id="byteFieldsTableBody">
+                                <!-- Appended dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Right Side Panel: Live Bit Stats, Rule Settings, JSON Import/Export & History Memory -->
+        <div class="col-lg-3">
+            
+            <!-- Bit Math Metric Statistics -->
+            <div class="card mb-4 shadow-sm border-start border-primary border-3">
+                <div class="card-header fw-semibold small py-2 bg-body-secondary">Real-Time Evaluation Metrics</div>
+                <div class="card-body py-2 px-3 small">
+                    <div class="d-flex justify-content-between border-bottom py-1">
+                        <span class="text-body-secondary">Signed (2's Comp):</span>
+                        <span id="statSigned" class="fw-bold font-monospace text-wrap text-end style-word-break" style="max-width:65%;">0</span>
+                    </div>
+                    <div class="d-flex justify-content-between border-bottom py-1">
+                        <span class="text-body-secondary">Highest Set Bit:</span>
+                        <span id="statHiBit" class="fw-bold font-monospace text-primary">-1</span>
+                    </div>
+                    <div class="d-flex justify-content-between border-bottom py-1">
+                        <span class="text-body-secondary">Lowest Set Bit:</span>
+                        <span id="statLoBit" class="fw-bold font-monospace text-success">-1</span>
+                    </div>
+                    <div class="d-flex justify-content-between border-bottom py-1">
+                        <span class="text-body-secondary">Bits Set (ON):</span>
+                        <span id="statSetCount" class="fw-bold font-monospace text-info">0</span>
+                    </div>
+                    <div class="d-flex justify-content-between py-1">
+                        <span class="text-body-secondary">Bits Clear (OFF):</span>
+                        <span id="statClearCount" class="fw-bold font-monospace text-danger">32</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dynamic Bit Rule Flag Mapping Controller -->
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header fw-semibold small py-2 bg-body-secondary d-flex justify-content-between align-items-center">
+                    <span>IntFlag & Checkbit Config</span>
+                    <i class="bi bi-info-circle text-primary copy-btn" data-bs-toggle="tooltip" title="Map normal bit targets to evaluate as compound checkbit IntFlags automatically."></i>
+                </div>
+                <div class="card-body p-2 small">
+                    <p class="text-muted xs mb-2" style="font-size:0.75rem;">Define downstream relational rule types. Set as dynamic checkbits when pairs match or trigger combinations.</p>
+                    <div style="max-height: 160px; overflow-y: auto;" id="rulesConfigWrapper">
+                        <!-- Dynamic list of registered checkbit rules -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Realtime History Array State Stack -->
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header fw-semibold small py-2 bg-body-secondary d-flex justify-content-between align-items-center">
+                    <span>State History Memory (Last 25)</span>
+                    <button class="btn btn-xs btn-outline-danger py-0 px-1" onclick="clearHistoryStack()" style="font-size: 0.7rem;">Clear</button>
+                </div>
+                <div class="list-group list-group-flush" id="historyStackList" style="max-height: 200px; overflow-y: auto;">
+                    <!-- States appended dynamically -->
+                </div>
+            </div>
+
+            <!-- JSON Architecture Sync Exporter Frame -->
+            <div class="card shadow-sm">
+                <div class="card-header fw-semibold small py-2 bg-body-secondary">Universal Metadata JSON Config</div>
+                <div class="card-body p-2">
+                    <textarea id="jsonConfigArea" class="form-control font-monospace p-1 mb-2 small" rows="6" style="font-size: 0.72rem;" placeholder='{"UNIVERSAL_META_BITS": { ... }}'></textarea>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-sm btn-dark flex-fill" onclick="exportStateToJson()"><i class="bi bi-box-arrow-up"></i> Export State</button>
+                        <button class="btn btn-sm btn-warning flex-fill text-dark" onclick="importStateFromJson()"><i class="bi bi-box-arrow-in-down"></i> Import Schema</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Toast element for system notices -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="liveToast" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body" id="toastMessage">State copied successfully.</div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap 5 JS Bundle with Popper -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // State global representation via BigInt to securely track up to 256 bits safely
+    let currentBitWidth = 32;
+    let bitValue = 0n;
+    let stateHistory = [];
+    const maxHistoryCount = 25;
+
+    // Rules Mapping for IntFlags Checkbits
+    // Structure holds checkbit index -> array of source input condition triggers
+    let intFlagRules = [
+        { target: 3, sources: [1, 2], label: "Parity/IntFlag 3" },
+        { target: 9, sources: [4, 5], label: "Parity/IntFlag 9" },
+        { target: 13, sources: [6, 7], label: "Parity/IntFlag 13" },
+        { target: 17, sources: [8, 9], label: "Parity/IntFlag 17" },
+        { target: 21, sources: [10, 11], label: "Parity/IntFlag 21" }
+    ];
+
+    // Initialize components on DOM Loaded
+    document.addEventListener("DOMContentLoaded", () => {
+        setupTheme();
+        renderBitMatrixCanvas();
+        renderRulesInterfaceList();
+        updateAllDisplays(true); // Populate initial state safely
+
+        // Attach global core validation listeners for textboxes
+        document.getElementById("archSelect").addEventListener("change", (e) => {
+            currentBitWidth = parseInt(e.target.value);
+            // Cap value matching boundaries
+            const mask = (1n << BigInt(currentBitWidth)) - 1n;
+            bitValue = bitValue & mask;
+            renderBitMatrixCanvas();
+            updateAllDisplays(true);
+        });
+
+        document.getElementById("inputDec").addEventListener("input", (e) => {
+            try {
+                let cleanVal = e.target.value.replace(/[^0-9\-]/g, '');
+                if (!cleanVal || cleanVal === '-') return;
+                let val = BigInt(cleanVal);
+                if (val < 0n) {
+                    // Treat as negative constraint mapping signed limits
+                    const maxUnsigned = 1n << BigInt(currentBitWidth);
+                    val = (maxUnsigned + val) % maxUnsigned;
+                }
+                setBitValueSafe(val);
+            } catch(err) { /* Absorb parse fractions safely */ }
+        });
+
+        document.getElementById("inputHex").addEventListener("input", (e) => {
+            try {
+                let hexStr = e.target.value.toLowerCase().replace(/0x/, '').replace(/[^0-9a-f]/g, '');
+                if(!hexStr) hexStr = "0";
+                setBitValueSafe(BigInt("0x" + hexStr));
+            } catch(err) {}
+        });
+
+        document.getElementById("inputBin").addEventListener("input", (e) => {
+            try {
+                let binStr = e.target.value.toLowerCase().replace(/0b/, '').replace(/[^01]/g, '');
+                if(!binStr) binStr = "0";
+                setBitValueSafe(BigInt("0b" + binStr));
+            } catch(err) {}
+        });
+
+        document.getElementById("inputOct").addEventListener("input", (e) => {
+            try {
+                let octStr = e.target.value.toLowerCase().replace(/0o/, '').replace(/[^0-7]/g, '');
+                if(!octStr) octStr = "0";
+                setBitValueSafe(BigInt("0o" + octStr));
+            } catch(err) {}
+        });
+
+        // Initialize bootstrap tooltips
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
+
+    // Theme Management Engine
+    function setupTheme() {
+        const toggleBtn = document.getElementById("themeToggleBtn");
+        const icon = document.getElementById("themeIcon");
+        toggleBtn.addEventListener("click", () => {
+            const currentTheme = document.documentElement.getAttribute("data-bs-theme");
+            const newTheme = currentTheme === "dark" ? "light" : "dark";
+            document.documentElement.setAttribute("data-bs-theme", newTheme);
+            icon.className = newTheme === "dark" ? "bi bi-moon-stars-fill" : "bi bi-sun-fill";
+        });
+    }
+
+    // Set value safely inside current bit width masks boundaries
+    function setBitValueSafe(val) {
+        const mask = (1n << BigInt(currentBitWidth)) - 1n;
+        bitValue = val & mask;
+        evaluateIntFlagAutomations();
+        updateAllDisplays(true);
+    }
+
+    // Evaluate Checkbits rules automatically when enabled (IntFlag logic)
+    function evaluateIntFlagAutomations() {
+        const ruleEnabled = document.getElementById("intFlagRuleCheck").checked;
+        if (!ruleEnabled) return;
+
+        intFlagRules.forEach(rule => {
+            if (rule.target >= currentBitWidth) return;
+            // Check if all source trigger bits are fully set
+            let allSet = true;
+            rule.sources.forEach(srcIdx => {
+                if (srcIdx < currentBitWidth) {
+                    const isSrcOn = (bitValue & (1n << BigInt(srcIdx))) !== 0n;
+                    if (!isSrcOn) allSet = false;
+                } else {
+                    allSet = false;
+                }
+            });
+
+            // If matched, force set target bit, else turn it off
+            const targetMask = 1n << BigInt(rule.target);
+            if (allSet) {
+                bitValue |= targetMask; // AND match activates IntFlag
+            } else {
+                bitValue &= ~targetMask; // Turn off flag
+            }
+        });
+    }
+
+    // Render interactive bits layout wrapped inside 32-bit row modules
+    function renderBitMatrixCanvas() {
+        const container = document.getElementById("bitMatrixContainer");
+        container.innerHTML = "";
+
+        // Calculate rows. 32-bits maximal layout separation per row block.
+        const totalBits = currentBitWidth;
+        const rowCount = Math.ceil(totalBits / 32);
+
+        for (let r = rowCount - 1; r >= 0; r--) {
+            const card = document.createElement("div");
+            card.className = "card mb-3 shadow-sm";
+            
+            const startBit = (r * 32) + 31;
+            const endBit = r * 32;
+            const displayStart = Math.min(startBit, totalBits - 1);
+            
+            card.innerHTML = `
+                <div class="card-header py-1 bg-body-secondary d-flex justify-content-between align-items-center small font-monospace">
+                    <span class="fw-bold">Row Chunk: Bits [${displayStart} down to ${endBit}]</span>
+                    <span class="badge bg-primary">Max 32 Wide Boundary</span>
+                </div>
+                <div class="card-body p-2">
+                    <div class="bit-matrix-row" id="bitRow-${r}"></div>
+                </div>
+            `;
+            container.appendChild(card);
+            const rowWrapper = document.getElementById(`bitRow-${r}`);
+
+            // Populate boxes from high index down to low index left-to-right logic order
+            const rowMaxIndex = Math.min(startBit, totalBits - 1);
+            const rowMinIndex = endBit;
+
+            for (let b = rowMaxIndex; b >= rowMinIndex; b--) {
+                const isCheckbitNode = intFlagRules.some(rule => rule.target === b);
+                const cell = document.createElement("div");
+                cell.id = `bitCell-${b}`;
+                cell.className = `bit-cell ${isCheckbitNode ? 'checkbit-node' : ''}`;
+                cell.setAttribute("onclick", `toggleSingleBitNode(${b})`);
+                
+                cell.innerHTML = `
+                    <span class="bit-idx font-monospace">${b}</span>
+                    <span class="bit-val font-monospace" id="bitValDisplay-${b}">0</span>
+                `;
+                rowWrapper.appendChild(cell);
+            }
+        }
+    }
+
+    // Render interactive configurable options interface
+    function renderRulesInterfaceList() {
+        const wrapper = document.getElementById("rulesConfigWrapper");
+        wrapper.innerHTML = "";
+        intFlagRules.forEach((rule, index) => {
+            const div = document.createElement("div");
+            div.className = "p-1 mb-1 border rounded bg-body-tertiary d-flex justify-content-between align-items-center font-monospace";
+            div.style.fontSize = "0.72rem";
+            div.innerHTML = `
+                <div>
+                    <span class="text-warning fw-bold">Bit ${rule.target}</span> &larr; [${rule.sources.join(" + ")}]
+                </div>
+                <span class="badge bg-secondary font-monospace" style="font-size:0.6rem;">AND/IntFlag</span>
+            `;
+            wrapper.appendChild(div);
+        });
+    }
+
+    // Toggle interactive single clicked elements
+    function toggleSingleBitNode(idx) {
+        const mask = 1n << BigInt(idx);
+        bitValue ^= mask; // Flip state array bit mask
+        evaluateIntFlagAutomations();
+        updateAllDisplays(true);
+    }
+
+    // Global Operation Triggers
+    function executeShift(direction) {
+        if (direction === 'left') {
+            bitValue = bitValue << 1n;
+        } else {
+            bitValue = bitValue >> 1n;
+        }
+        const mask = (1n << BigInt(currentBitWidth)) - 1n;
+        bitValue &= mask;
+        evaluateIntFlagAutomations();
+        updateAllDisplays(true);
+    }
+
+    function executeInvert() {
+        bitValue = ~bitValue;
+        const mask = (1n << BigInt(currentBitWidth)) - 1n;
+        bitValue &= mask;
+        evaluateIntFlagAutomations();
+        updateAllDisplays(true);
+    }
+
+    function executeSetAll() {
+        bitValue = (1n << BigInt(currentBitWidth)) - 1n;
+        evaluateIntFlagAutomations();
+        updateAllDisplays(true);
+    }
+
+    function executeClearAll() {
+        bitValue = 0n;
+        evaluateIntFlagAutomations();
+        updateAllDisplays(true);
+    }
+
+    // Master Display Sync Core Coordinator Engine
+    function updateAllDisplays(recordHistory = true) {
+        const mask = (1n << BigInt(currentBitWidth)) - 1n;
+        bitValue &= mask;
+
+        // Sync main inputs fields
+        document.getElementById("inputDec").value = bitValue.toString(10);
+        document.getElementById("inputHex").value = "0x" + bitValue.toString(16).toUpperCase();
+        document.getElementById("inputBin").value = "0b" + bitValue.toString(2);
+        document.getElementById("inputOct").value = "0o" + bitValue.toString(8);
+
+        // Sync individual active bit cell visual matrix DOM elements states
+        let setCount = 0;
+        let hiBit = -1;
+        let loBit = -1;
+
+        for (let i = 0; i < currentBitWidth; i++) {
+            const cell = document.getElementById(`bitCell-${i}`);
+            const display = document.getElementById(`bitValDisplay-${i}`);
+            const isSet = (bitValue & (1n << BigInt(i))) !== 0n;
+
+            if (cell && display) {
+                if (isSet) {
+                    cell.classList.add("active-bit");
+                    display.innerText = "1";
+                    setCount++;
+                    hiBit = i;
+                    if (loBit === -1) loBit = i;
+                } else {
+                    cell.classList.remove("active-bit");
+                    display.innerText = "0";
+                }
+            }
+        }
+
+        // Sync Real-Time Metrics evaluation panel
+        document.getElementById("statSetCount").innerText = setCount;
+        document.getElementById("statClearCount").innerText = currentBitWidth - setCount;
+        document.getElementById("statHiBit").innerText = hiBit;
+        document.getElementById("statLoBit").innerText = loBit;
+
+        // Calculate signed evaluation (Two's Complement interpretation matching framework width)
+        let signedStr = bitValue.toString(10);
+        const signBitMask = 1n << BigInt(currentBitWidth - 1);
+        if ((bitValue & signBitMask) !== 0n) {
+            // Negative signed detected
+            const maxUnsigned = 1n << BigInt(currentBitWidth);
+            const signedVal = bitValue - maxUnsigned;
+            signedStr = signedVal.toString(10);
+        }
+        document.getElementById("statSigned").innerText = signedStr;
+
+        // Render separate byte-fields table array splits
+        renderByteTableBreakdown();
+
+        // Manage rolling stack history updates tracking arrays
+        if (recordHistory) {
+            pushHistoryState();
+        }
+    }
+
+    // Break down values into separate distinct 8-bit isolated byte structures
+    function renderByteTableBreakdown() {
+        const tbody = document.getElementById("byteFieldsTableBody");
+        tbody.innerHTML = "";
+        
+        const byteCount = Math.ceil(currentBitWidth / 8);
+        document.getElementById("byteCountBadge").innerText = `${byteCount} Byte${byteCount > 1 ? 's' : ''}`;
+
+        for (let i = byteCount - 1; i >= 0; i--) {
+            const startBit = i * 8;
+            const endBit = Math.min(startBit + 7, currentBitWidth - 1);
+            
+            // Extract isolated block mask value shifts
+            let byteValue = 0n;
+            let binSegmentStr = "";
+            
+            for (let b = endBit; b >= startBit; b--) {
+                const bitOn = (bitValue & (1n << BigInt(b))) !== 0n;
+                binSegmentStr += bitOn ? "1" : "0";
+                if (bitOn) {
+                    byteValue |= (1n << BigInt(b - startBit));
+                }
+            }
+
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td class="fw-bold text-primary">Byte ${i}</td>
+                <td class="text-secondary">[${endBit}:${startBit}]</td>
+                <td class="text-info font-monospace">${binSegmentStr.padStart(8, '0')}</td>
+                <td class="text-success fw-bold">0x${byteValue.toString(16).toUpperCase().padStart(2, '0')}</td>
+                <td class="text-body fw-semibold">${byteValue.toString(10)}</td>
+            `;
+            tbody.appendChild(tr);
+        }
+    }
+
+    // Push state tracking variables history blocks
+    function pushHistoryState() {
+        const hexSnapshot = "0x" + bitValue.toString(16).toUpperCase();
+        
+        // Avoid duplicate immediate entries onto the history track
+        if (stateHistory.length > 0 && stateHistory[0].value === bitValue && stateHistory[0].width === currentBitWidth) {
+            return;
+        }
+
+        stateHistory.unshift({
+            value: bitValue,
+            width: currentBitWidth,
+            hex: hexSnapshot
+        });
+
+        if (stateHistory.length > maxHistoryCount) {
+            stateHistory.pop();
+        }
+        renderHistoryListUI();
+    }
+
+    function renderHistoryListUI() {
+        const list = document.getElementById("historyStackList");
+        list.innerHTML = "";
+        
+        if (stateHistory.length === 0) {
+            list.innerHTML = `<div class="p-2 text-muted text-center small" style="font-size:0.75rem;">No history logged yet.</div>`;
+            return;
+        }
+
+        stateHistory.forEach((state, index) => {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = "list-group-item list-group-item-action history-list-item py-1 px-2 d-flex justify-content-between align-items-center";
+            button.onclick = () => revertToHistoricalState(index);
+            button.innerHTML = `
+                <span>Snapshot [${index}]</span>
+                <span class="badge bg-secondary font-monospace">${state.width}b | ${state.hex}</span>
+            `;
+            list.appendChild(button);
+        });
+    }
+
+    function revertToHistoricalState(idx) {
+        const state = stateHistory[idx];
+        if (!state) return;
+        currentBitWidth = state.width;
+        document.getElementById("archSelect").value = currentBitWidth.toString();
+        bitValue = state.value;
+        renderBitMatrixCanvas();
+        updateAllDisplays(false); // Don't push tracking stack loops
+    }
+
+    function clearHistoryStack() {
+        stateHistory = [];
+        renderHistoryListUI();
+    }
+
+    // JSON Schema Config Code Exporter / Importer Parser Engine
+    function exportStateToJson() {
+        let metaObj = {
+            "UNIVERSAL_META_BITS": {
+                "BIT-CLEAR": { "value": 0, "expr": "0", "type": "PRESET", "group": "PRESET", "comment": "ALL OFF" },
+                "BIT-ON": { 
+                    "value": Number((1n << BigInt(currentBitWidth)) - 1n), 
+                    "expr": `0x${((1n << BigInt(currentBitWidth)) - 1n).toString(16).toUpperCase()}`, 
+                    "type": "DEFAULT", 
+                    "group": "PRESET", 
+                    "comment": "ALL ON" 
+                }
+            }
+        };
+
+        // Loop array properties and extract variables elements dynamically
+        for (let i = 0; i < currentBitWidth; i++) {
+            const isSet = (bitValue & (1n << BigInt(i))) !== 0n;
+            if (isSet) {
+                const byteGroup = Math.floor(i / 8);
+                const isCheckbitNode = intFlagRules.some(rule => rule.target === i);
+                
+                metaObj["UNIVERSAL_META_BITS"][`BIT-${i}`] = {
+                    "value": Number(1n << BigInt(i)),
+                    "expr": i === 0 ? "0" : `1 << ${i}`,
+                    "type": isCheckbitNode ? "CHK-SUM" : "BIT",
+                    "group": `BYTE-${byteGroup}`,
+                    "comment": `BIT-${i} toggle flags mask state`
+                };
+            }
+        }
+
+        const jsonStr = JSON.stringify(metaObj, null, 4);
+        document.getElementById("jsonConfigArea").value = jsonStr;
+        showToastNotification("State exported to custom schema text block area below.");
+    }
+
+    function importStateFromJson() {
+        try {
+            const rawStr = document.getElementById("jsonConfigArea").value.trim();
+            if (!rawStr) return;
+            const parsed = JSON.parse(rawStr);
+            
+            if (!parsed.UNIVERSAL_META_BITS) {
+                alert("Missing root 'UNIVERSAL_META_BITS' node configuration block standard.");
+                return;
+            }
+
+            let computedVal = 0n;
+            const keys = Object.keys(parsed.UNIVERSAL_META_BITS);
+
+            keys.forEach(key => {
+                if (key.startsWith("BIT-") && key !== "BIT-CLEAR" && key !== "BIT-ON") {
+                    const node = parsed.UNIVERSAL_META_BITS[key];
+                    if (node && node.value) {
+                        computedVal |= BigInt(node.value);
+                    }
+                }
+            });
+
+            // Adjust width framework detection based on max imported nodes safely
+            setBitValueSafe(computedVal);
+            showToastNotification("Schema file imported and bit values recalculated.");
+        } catch (err) {
+            alert("Malformed JSON configuration structure format. Verify inputs parameters mapping syntax.");
+        }
+    }
+
+    // Helper functions
+    function copyToClipboard(elementId) {
+        const copyText = document.getElementById(elementId);
+        copyText.select();
+        copyText.setSelectionRange(0, 99999);
+        navigator.clipboard.writeText(copyText.value).then(() => {
+            showToastNotification(`Value copied: ${copyText.value}`);
+        });
+    }
+
+    function showToastNotification(msg) {
+        document.getElementById("toastMessage").innerText = msg;
+        const toastEl = document.getElementById('liveToast');
+        const toast = new bootstrap.Toast(toastEl);
+        toast.show();
+    }
+</script>
+</body>
+</html>
