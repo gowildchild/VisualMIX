@@ -1,5 +1,5 @@
 /** 
- * * VisualMIX Cryptographics and Integrity v0.0.4
+ * * VisualMIX Cryptographics and Integrity v0.0.7
  *** Checking and Signing routines          VisualMIX/front_end/core/universal_crypto.js
  ** (c)2007-2012 Gunther Voet
 **/
