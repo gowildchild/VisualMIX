@@ -1,7 +1,8 @@
-/**
- * VisualMIX/integrity_check/universal_style_menu.css
- * Responsive Semantic HTML Top Navigation Menu Bar.
-***/
+/** 
+ * * RESPONSIVE MENU BAR                   - YouAreHere     v0.1
+ *** VisualMIX/front_end/ui/style_menu.css
+ ** (c)2006-2012 Gunther Voet
+**/
 
 .top-navbar {
     background: var(--bg-panel);
