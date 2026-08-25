@@ -29,6 +29,48 @@
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+.hidden-node { 
+    display: none !important; 
+}
+
+.badge-pass { 
+    background: rgba(63, 185, 80, 0.15); 
+    color: var(--green); 
+    border: 1px solid var(--green); 
+    padding: 2px 6px; 
+    border-radius: 4px; 
+    font-size: 11px; 
+    font-weight: bold;
+}
+
+.badge-fail { 
+    background: rgba(248, 81, 73, 0.15); 
+    color: var(--red); 
+    border: 1px solid var(--red); 
+    padding: 2px 6px; 
+    border-radius: 4px; 
+    font-size: 11px; 
+    font-weight: bold;
+}
+
+.led-container { 
+    display: inline-flex; 
+    align-items: center; 
+    gap: 8px; 
+    font-family: monospace; 
+    font-size: 13px; 
+    font-weight: bold; 
+}
+
+/* Clear alignment anomalies inside table metrics matrices */
+table td {
+    vertical-align: middle;
+}
+
+.led-container .led-fixture {
+    margin-right: 0px !important;
+}
+
 .led-fixture.fx-round { border-radius: 50%; }
 .led-fixture.fx-rect { width: 14px; height: 8px; border-radius: 2px; }
 .led-fixture.fx-matte { border: 1px solid rgba(255,255,255,0.08); filter: saturate(1.1); }
