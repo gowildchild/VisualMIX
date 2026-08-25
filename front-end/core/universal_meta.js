@@ -280,6 +280,11 @@ function computeDetailedTextDiff(expectedStr, incomingStr) {
     return diffLog;
 }
 
+/**
+ * 🔬 DYNAMIC STRUCT-AGNOSTIC MINORITY REPORT ENGINE
+ * Completely decoupled from specific schema keys. Recursively audits ANY JSON structural 
+ * payload array, matching and hashing dynamic dictionary fields on the fly.
+ */
 function executeCryptographicVerificationDiff() {
     const inputArea = document.getElementById('session-input').value.trim();
     const reportPanel = document.getElementById('report-panel');
@@ -292,58 +297,110 @@ function executeCryptographicVerificationDiff() {
         incoming = JSON.parse(text);
     } catch(e) {
         setVisualLedStatus("orange", "Faulty Intercept");
-        reportPanel.innerHTML = "<h3>❌ CRITICAL DATA DISCONNECT: Pasted clipboard snapshot is structurally corrupt.</h3>";
+        reportPanel.innerHTML = "<h3>❌ CRITICAL DATA DISCONNECT: Pasted payload is structurally corrupt.</h3>";
         return;
     }
 
-    const schema = masterConfig.SYSTEM_BASELINE_CONFIG.master_pipeline_schema;
-    let htmlReport = "<h2>🔬 LIVE ZERO-TRUST MINORITY REPORT</h2>";
-    let codeDiffs = "", overallPassed = true;
+    // 🔍 Line-by-Line Character Diff Engine Tracker
+    function computeDetailedTextDiff(expectedStr, incomingStr, label) {
+        let expLines = String(expectedStr).split("\n");
+        let incLines = String(incomingStr).split("\n");
+        let maxLines = Math.max(expLines.length, incLines.length);
+        let diffLog = "";
 
-    if (incoming.SYSTEM_BASELINE_CONFIG?.master_pipeline_schema) {
-        const incomingSchema = incoming.SYSTEM_BASELINE_CONFIG.master_pipeline_schema;
-        for (let cat in schema) {
-            const activeSrc = schema[cat].ground_truth_source;
-            let matchedIncomingKey = incomingSchema[cat] ? cat : Object.keys(incomingSchema).find(k => getCleanShortKey(k) === getCleanShortKey(cat));
-            const incomingSrc = matchedIncomingKey ? incomingSchema[matchedIncomingKey].ground_truth_source : "";
+        for (let i = 0; i < maxLines; i++) {
+            let eLine = expLines[i] !== undefined ? expLines[i] : null;
+            let iLine = incLines[i] !== undefined ? incLines[i] : null;
 
-            if (activeSrc !== incomingSrc) {
-                overallPassed = false;
-                codeDiffs += `<h3>📍 Logical Drift Trapped inside target block logic module: ${getCleanShortKey(cat)}</h3>`;
-                codeDiffs += `<pre style="background: var(--bg-panel); padding: 8px; border-radius: 4px;">${computeDetailedTextDiff(activeSrc, incomingSrc)}</pre>`;
+            if (eLine !== iLine) {
+                let lineNum = i + 1;
+                diffLog += `<div style="margin-top: 6px; border-left: 2px solid var(--red); padding-left: 6px; font-family: monospace; font-size: 11px;">`;
+                diffLog += `<b>📍 Line ${lineNum} Drift [${label}]:</b><br/>`;
+
+                if (eLine === null) {
+                    diffLog += `<span style="color:var(--green)">[+] Added: ${escapeHtml(iLine)}</span>`;
+                } else if (iLine === null) {
+                    diffLog += `<span style="color:var(--red)">[-] Deleted: ${escapeHtml(eLine)}</span>`;
+                } else {
+                    let charOffset = 1;
+                    let maxChars = Math.max(eLine.length, iLine.length);
+                    for (let c = 0; c < maxChars; c++) {
+                        if (eLine[c] !== iLine[c]) { charOffset = c + 1; break; }
+                    }
+                    diffLog += `<span style="color:var(--red)">Expected (Char ${charOffset}): ${escapeHtml(eLine)}</span><br/>`;
+                    diffLog += `<span style="color:var(--green)">Incoming (Char ${charOffset}): ${escapeHtml(iLine)}</span>`;
+                }
+                diffLog += `</div>`;
             }
         }
+        return diffLog;
     }
-    
-    let incomingRegistry = incoming[metaRegistryName] || incoming["CHECKSUM_MD5HASH_REGISTRY"] || incoming["CHECKSUM_HASH_REGISTRY"] || incoming.SYSTEM_BASELINE_CONFIG?.[metaRegistryName] || incoming;
-    let tableHtml = "<table><tr><th>Target Field Group</th><th>Calc Source</th><th>Expected</th><th>Calc Env</th><th>Expected</th><th>Status Matrix Monitoring</th></tr>";
-    
-    const categories = Object.keys(schema).sort();
-    categories.forEach(longKey => {
-        let shortKey = getCleanShortKey(longKey);
-        const envelope = schema[longKey];
-        
-        const trueSrc = getCryptoHash(envelope.ground_truth_source, currentAlgo);
-        const trueEnv = getEnvelopeHash(envelope, currentAlgo);
-        
-        const fileHashes = incomingRegistry[shortKey] || incomingRegistry[longKey] || incomingRegistry[shortKey.replace("CATEGORY_", "")] || {};
-        const providedSrc = fileHashes.src || ""; const providedEnv = fileHashes.envelope || "";
-        
-        let srcMatch = trueSrc === providedSrc, envMatch = trueEnv === providedEnv;
-        if (!srcMatch || !envMatch) overallPassed = false;
 
-        const stateColor = (srcMatch && envMatch) ? "green" : "red";
-        const stateLabel = (srcMatch && envMatch) ? "FOUND AND OK" : "MUTATED DRIFT";
+    // 🧭 Universal Structure Crawer: Flattens any incoming JSON object tree into pure hashable string key/value pairs
+    function flattenStructureMap(obj, prefix = "", targetMap = {}) {
+        if (obj === null || obj === undefined) return targetMap;
+        
+        if (typeof obj !== "object") {
+            targetMap[prefix] = obj;
+            return targetMap;
+        }
 
+        for (let key in obj) {
+            if (Object.prototype.hasOwnProperty.call(obj, key)) {
+                let cleanKey = prefix ? `${prefix}.${key}` : key;
+                // If it's a structural leaf or source string block, anchor it
+                if (typeof obj[key] !== "object" || obj[key] === null) {
+                    targetMap[cleanKey] = obj[key];
+                } else {
+                    flattenStructureMap(obj[key], cleanKey, targetMap);
+                }
+            }
+        }
+        return targetMap;
+    }
+
+    // Map structural topologies for both your expected baseline and your target inputs
+    const masterMap = flattenStructureMap(masterConfig);
+    const incomingMap = flattenStructureMap(incoming);
+
+    let htmlReport = "<h2>MINORITY REPORT (UNIVERSAL STRUCT ENGINE)</h2>";
+    let codeDiffs = "", overallPassed = true;
+    let tableHtml = "<table><tr><th>Target Structural Node Pathway</th><th>Expected Baseline Value / Hash</th><th>Incoming Payload Value / Hash</th><th>Status Matrix Monitoring</th></tr>";
+
+    // Sort key paths deterministically to preserve matrix lines mapping symmetry
+    const uniqueKeys = Array.from(new Set([...Object.keys(masterMap), ...Object.keys(incomingMap)])).sort();
+
+    uniqueKeys.forEach(pathKey => {
+        // Skip metadata configuration block headers to clean the terminal display logs
+        if (pathKey.includes("visualmixMeta") || pathKey.includes("INTEGRITY_META_PROFILE")) return;
+
+        const valExpected = masterMap[pathKey] !== undefined ? String(masterMap[pathKey]) : null;
+        const valIncoming = incomingMap[pathKey] !== undefined ? String(incomingMap[pathKey]) : null;
+
+        // Dynamic algorithm loop assignment hashes text nodes if they span multi-line modules
+        const hashExpected = valExpected && valExpected.includes("\n") ? getCryptoHash(valExpected, currentAlgo) : valExpected;
+        const hashIncoming = valIncoming && valIncoming.includes("\n") ? getCryptoHash(valIncoming, currentAlgo) : valIncoming;
+
+        const isMatch = hashExpected === hashIncoming;
+        if (!isMatch) overallPassed = false;
+
+        const stateColor = isMatch ? "green" : "red";
+        const stateLabel = isMatch ? "OK" : "MUTATED";
+
+        // Generate line-by-character structural diff tracing blocks if code drifts are captured
+        if (!isMatch && valExpected && valIncoming) {
+            codeDiffs += `<h3>📍 Node Path Shift Trapped: ${pathKey}</h3>`;
+            codeDiffs += `<div style="background: var(--bg-input); padding: 8px; border-radius: 4px; margin-bottom:10px;">${computeDetailedTextDiff(valExpected, valIncoming, pathKey)}</div>`;
+        }
+
+        // 🔘 HARD-WELDED: Pure Round, Shiny Gloss Indicator Fixtures Injecting into Table Row Arrays
         tableHtml += `<tr>
-            <td><b>${shortKey}</b></td>
-            <td style="color:${srcMatch?'var(--green)':'var(--red)'}">${trueSrc}</td>
-            <td>${providedSrc || 'MISSING'}</td>
-            <td style="color:${envMatch?'var(--green)':'var(--red)'}">${trueEnv}</td>
-            <td>${providedEnv || 'MISSING'}</td>
+            <td><code style="color:var(--accent); font-size:11px;">${pathKey}</code></td>
+            <td style="color:${isMatch?'var(--green)':'var(--red)'}; font-family:monospace; max-width:180px; overflow:hidden; text-overflow:ellipsis;">${hashExpected || 'NULL/MISSING'}</td>
+            <td style="font-family:monospace; max-width:180px; overflow:hidden; text-overflow:ellipsis;">${hashIncoming || 'NULL/MISSING'}</td>
             <td>
-                <span class="led-container" style="display:inline-flex; align-items:center;">
-                    <div class="led-fixture fx-round fx-shiny led-c-${stateColor}" style="width:10px; height:12px; margin-right:6px;"></div>
+                <span class="led-container" style="display:inline-flex; align-items:center; gap: 6px;">
+                    <div class="led-fixture fx-round fx-shiny led-c-${stateColor}" style="width:12px; height:12px;"></div>
                     <span style="color:var(--${stateColor}); font-size:11px; font-weight:bold;">${stateLabel}</span>
                 </span>
             </td>
@@ -356,23 +413,14 @@ function executeCryptographicVerificationDiff() {
     htmlReport += `<div style="margin-bottom:12px;"><b>Operational Compliance Boundary Status:</b> <span class="badge ${overallPassed?'badge-pass':'badge-fail'}">${overallPassed?'100% PERFECT':'DECAY DRIFT TRAPPED'}</span></div>` + tableHtml;
     if (codeDiffs) htmlReport += "<h2>🚨 LINE-LEVEL SYNTAX GAP DELTAS</h2>" + codeDiffs;
 
-    if (!overallPassed) {
-        let fixedRegistry = `    "${metaRegistryName}": {\n`;
-        categories.forEach((k, idx) => {
-            let shortKey = getCleanShortKey(k);
-            fixedRegistry += `      "${shortKey}": { "src": "${getCryptoHash(schema[k].ground_truth_source, currentAlgo)}", "envelope": "${getEnvelopeHash(schema[k], currentAlgo)}" }${idx < categories.length - 1 ? ',':''}\n`;
-        });
-        fixedRegistry += "    }";
-        htmlReport += "<h2>🔧 TRUE RE-SYNCHRONIZED CHECKSUM REGISTER BLOCK:</h2>" + `<pre style="font-size:11px;">${fixedRegistry}</pre>`;
-    }
-    
     reportPanel.innerHTML = htmlReport;
-    writeLogToPanel(`Audit executed. Verdict Status: ${overallPassed ? 'PASS' : 'REJECTED_DRIFT'}`);
+    writeLogToPanel(`Universal Audit executed. Verdict Status: ${overallPassed ? 'PASS' : 'REJECTED_DRIFT'}`);
     
     if (typeof applyLiveTelemetryCalibration === "function") {
         applyLiveTelemetryCalibration();
     }
 }
+
 
 function evaluateWorkspaceState(metaJson, testJson) {
     metaConfig = metaJson;
