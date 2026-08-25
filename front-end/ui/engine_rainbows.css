@@ -1,0 +1,90 @@
+/** 
+ * 🌈 ENGINE: Rainbows v0.3.5
+ * Hardware-Accelerated Dynamic Glow Matrix & Layout Canvas Theme
+ * (c)2006-2012 Gunther Voet | VisualMIX/front-end/ui/engine_rainbows.css
+ */
+
+:root {
+    /* 🎛️ Live Parameter Anchors: Controlled dynamically by the JS deck layer */
+    --rainbow-speed: 15s;
+    --rainbow-blur: 6px;
+    --rainbow-opacity: 0.75;
+    --rainbow-radius: 6px; /* Symmetrically binds right next to your standard panel borders */
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+}
+
+/* 🧭 The Master Backdrop Mixing Canvas Centering Framework */
+.view-center-canvas {
+    min-height: 100vh;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center; 
+    align-items: center;     
+}
+
+/* 🏎️ Cockpit Offset Shift Container */
+.shifted-up-container {
+    transform: translateY(-7%);
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-top: 45px;
+}
+
+@media (min-width: 992px) {
+    .shifted-up-container {
+        transform: translateY(-5%); 
+        margin-top: 30px;
+    }
+}
+
+.w-90 {
+    width: 91% !important;
+    max-width: 91% !important;
+}
+
+/* 🧭 Asynchronous NProgress Processing Ticker Position Mount */
+#nprogress .spinner {
+    display: block;
+    position: fixed;
+    z-index: 999999;
+    top: 70px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+/* 🎛️ The Infinite Neon Vinyl Rainbow Glow Wrapper Matrix */
+.rainbow-card-wrapper {
+    position: relative;
+    display: block;
+    width: 100%;
+    z-index: 2;
+}
+
+.rainbow-card-wrapper::before {
+    content: "";
+    position: absolute;
+    top: 2px;                    
+    bottom: -2px;                 
+    left: 2px;                    
+    right: 2px;                   
+    z-index: -1;
+    background: linear-gradient(90deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000);
+    background-size: 400%;
+    border-radius: var(--rainbow-radius); 
+    filter: blur(var(--rainbow-blur));            
+    opacity: var(--rainbow-opacity);                
+    animation: card-rainbow-glow var(--rainbow-speed) linear infinite;
+    will-change: background-position; /* Force GPU thread acceleration loop */
+}
+
+@keyframes card-rainbow-glow {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 400% 50%; }
+}
