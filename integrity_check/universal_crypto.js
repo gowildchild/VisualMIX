@@ -1,5 +1,5 @@
 ////////////////////
-// VisualMIX Crypto Java v0.0.3     
+// VisualMIX Crypto Java v0.0.4
 // (c)2007-2026 by Gunther Voet
    ////////////////////////////// 
 
