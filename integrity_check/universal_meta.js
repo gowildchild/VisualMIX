@@ -338,6 +338,51 @@ function executeCryptographicVerificationDiff() {
         return;
     }
 
+    // Dynamic extraction helper to isolate short key mappings safely (e.g. "CATEGORY_A")
+    function getCleanShortKey(longKey) {
+        let parts = longKey.split("_");
+        if (parts.length >= 2 && parts[0] === "CATEGORY") {
+            return parts[0] + "_" + parts[1];
+        }
+        return longKey.replace("CATEGORY_", "").split("_")[0];
+    }
+
+    // 🔍 Built-In Line & Character Position Delta Interrogator
+    function computeDetailedTextDiff(expectedStr, incomingStr) {
+        let expLines = expectedStr.split("\n");
+        let incLines = incomingStr.split("\n");
+        let maxLines = Math.max(expLines.length, incLines.length);
+        let diffLog = "";
+
+        for (let i = 0; i < maxLines; i++) {
+            let eLine = expLines[i] !== undefined ? expLines[i] : null;
+            let iLine = incLines[i] !== undefined ? incLines[i] : null;
+
+            if (eLine !== iLine) {
+                let lineNum = i + 1;
+                diffLog += `<div style="margin-top: 8px; border-left: 2px solid var(--red); padding-left: 6px;">`;
+                diffLog += `<b>📍 Line ${lineNum} Disconnection:</b><br/>`;
+
+                if (eLine === null) {
+                    diffLog += `<span class="diff-add">[Added Line] Char 1: ${escapeHtml(iLine)}</span>`;
+                } else if (iLine === null) {
+                    diffLog += `<span class="diff-del">[Deleted Line] Char 1: ${escapeHtml(eLine)}</span>`;
+                } else {
+                    // Character-by-character mismatch scanning loop
+                    let charOffset = 1;
+                    let maxChars = Math.max(eLine.length, iLine.length);
+                    for (let c = 0; j = c < maxChars, c++) {
+                        if (eLine[c] !== iLine[c]) { charOffset = c + 1; break; }
+                    }
+                    diffLog += `<span class="diff-del">Expected (Char ${charOffset}): ${escapeHtml(eLine)}</span><br/>`;
+                    diffLog += `<span class="diff-add">Incoming (Char ${charOffset}): ${escapeHtml(iLine)}</span>`;
+                }
+                diffLog += `</div>`;
+            }
+        }
+        return diffLog;
+    }
+
     const schema = masterConfig.SYSTEM_BASELINE_CONFIG.master_pipeline_schema;
     let htmlReport = "<h2>🔬 LIVE ZERO-TRUST METRICS INTERROGATION LOG</h2>";
     let codeDiffs = "", overallPassed = true;
@@ -346,34 +391,44 @@ function executeCryptographicVerificationDiff() {
         const incomingSchema = incoming.SYSTEM_BASELINE_CONFIG.master_pipeline_schema;
         for (let cat in schema) {
             const activeSrc = schema[cat].ground_truth_source;
-            const incomingSrc = incomingSchema[cat] ? incomingSchema[cat].ground_truth_source : "";
+            // Catch variations where keys match either long names or short signatures
+            let matchedIncomingKey = incomingSchema[cat] ? cat : Object.keys(incomingSchema).find(k => getCleanShortKey(k) === getCleanShortKey(cat));
+            const incomingSrc = matchedIncomingKey ? incomingSchema[matchedIncomingKey].ground_truth_source : "";
+
             if (activeSrc !== incomingSrc) {
                 overallPassed = false;
-                codeDiffs += `<h3>📍 Logical Drift Trapped inside target block logic module: ${cat}</h3>`;
-                codeDiffs += `<pre><span class="diff-del">${escapeHtml(activeSrc)}</span>\n\n<span class="diff-add">${escapeHtml(incomingSrc)}</span></pre>`;
+                codeDiffs += `<h3>📍 Logical Drift Trapped inside target block logic module: ${getCleanShortKey(cat)}</h3>`;
+                codeDiffs += `<pre style="background: var(--bg-panel); padding: 8px; border-radius: 4px;">${computeDetailedTextDiff(activeSrc, incomingSrc)}</pre>`;
             }
         }
     }
-
-    let incomingRegistry = incoming[metaRegistryName] || incoming["CHECKSUM_HASH_REGISTRY"] || incoming["CHECKSUM_MD5HASH_REGISTRY"] || incoming.SYSTEM_BASELINE_CONFIG?.[metaRegistryName] || incoming;
+    let incomingRegistry = incoming[metaRegistryName] || incoming["CHECKSUM_MD5HASH_REGISTRY"] || incoming["CHECKSUM_HASH_REGISTRY"] || incoming.SYSTEM_BASELINE_CONFIG?.[metaRegistryName] || incoming;
     let tableHtml = "<table><tr><th>Target Field Group</th><th>Calc Source</th><th>Expected</th><th>Calc Env</th><th>Expected</th><th>Status</th></tr>";
     
     const categories = Object.keys(schema).sort();
     categories.forEach(longKey => {
-        let shortKey = longKey.replace("CATEGORY_", "").split("_");
+        let shortKey = getCleanShortKey(longKey);
         const envelope = schema[longKey];
         
-        // Dynamic library resolution loops linking to universal_crypto.js
+        // Calculate dynamic expected hashes linking natively to universal_crypto.js
         const trueSrc = getCryptoHash(envelope.ground_truth_source, currentAlgo);
         const trueEnv = getEnvelopeHash(envelope, currentAlgo);
         
+        // Dynamic registry cross-referencing lookups
         const fileHashes = incomingRegistry[shortKey] || incomingRegistry[longKey] || {};
         const providedSrc = fileHashes.src || ""; const providedEnv = fileHashes.envelope || "";
         
         let srcMatch = trueSrc === providedSrc, envMatch = trueEnv === providedEnv;
         if (!srcMatch || !envMatch) overallPassed = false;
 
-        tableHtml += `<tr><td><b>${shortKey}</b></td><td style="color:${srcMatch?'#3fb950':'#f85149'}">${trueSrc}</td><td>${providedSrc || 'MISSING'}</td><td style="color:${envMatch?'#3fb950':'#f85149'}">${trueEnv}</td><td>${providedEnv || 'MISSING'}</td><td><span class="badge ${srcMatch && envMatch ? 'badge-pass':'badge-fail'}">${srcMatch && envMatch ? 'PASSED':'MUTATED'}</span></td></tr>`;
+        tableHtml += `<tr>
+            <td><b>${shortKey}</b></td>
+            <td style="color:${srcMatch?'var(--green)':'var(--red)'}">${trueSrc}</td>
+            <td>${providedSrc || 'MISSING'}</td>
+            <td style="color:${envMatch?'var(--green)':'var(--red)'}">${trueEnv}</td>
+            <td>${providedEnv || 'MISSING'}</td>
+            <td><span class="badge ${srcMatch && envMatch ? 'badge-pass':'badge-fail'}">${srcMatch && envMatch ? 'PASSED':'MUTATED'}</span></td>
+        </tr>`;
     });
     tableHtml += "</table>";
 
@@ -383,9 +438,10 @@ function executeCryptographicVerificationDiff() {
     if (codeDiffs) htmlReport += "<h2>🚨 LINE-LEVEL SYNTAX GAP DELTAS</h2>" + codeDiffs;
 
     if (!overallPassed) {
+        // Output code fixes precisely generated with your configuration registry profile title
         let fixedRegistry = `    "${metaRegistryName}": {\n`;
         categories.forEach((k, idx) => {
-            let shortKey = k.replace("CATEGORY_", "").split("_");
+            let shortKey = getCleanShortKey(k);
             fixedRegistry += `      "${shortKey}": { "src": "${getCryptoHash(schema[k].ground_truth_source, currentAlgo)}", "envelope": "${getEnvelopeHash(schema[k], currentAlgo)}" }${idx < categories.length - 1 ? ',':''}\n`;
         });
         fixedRegistry += "    }";
@@ -395,6 +451,7 @@ function executeCryptographicVerificationDiff() {
     reportPanel.innerHTML = htmlReport;
     writeLogToPanel(`Audit executed. Verdict Status: ${overallPassed ? 'PASS' : 'REJECTED_DRIFT'}`);
 }
+
 
 function evaluateWorkspaceState(metaJson, testJson) {
     metaConfig = metaJson;
