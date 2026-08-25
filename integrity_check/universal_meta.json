@@ -13,7 +13,7 @@
       "action": ["clear","copy:source","clear:keys"],
       "checks": ["MD5","SHA-1","SHA-256","MODULO","CHAIN"],
       "files_meta": ["json_meta"],
-      "files_source": ["json_src_challenge","json_src_integrity"],
+      "files_source": ["json_src_challenge","json_src_integrity"]
     },
     "options": {
         "meta":   ["JSON", "URL", "INPUT", "DIRECT"],
@@ -27,7 +27,7 @@
           "root": "SYSTEM_BASELINE_CONFIG",
           "registry": "CHECKSUM_MD5HASH_REGISTRY",
           "keys": ["CATEGORY_A","CATEGORY_B","CATEGORY_C","CATEGORY_D"],
-          "check": ["src","envelope"],
+          "check": ["src","envelope"]
         },                    
     },
     "path": "https://raw.githubusercontent.com/gowildchild/VisualMIX/refs/heads/main/integrity_check/",
