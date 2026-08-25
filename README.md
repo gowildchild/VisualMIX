@@ -1,4 +1,4 @@
-This is a small ode to the **VisualMIX Engine** which was stolen in 2012 at release! 
+This is a small ode to the **[VisualMIX Engine](https://github.com/gowildchild/VisualMIX/)** which was stolen in 2012 at release! 
 
 It had tons of ready-made, ready-use functions to make programming not only easier, but also more possible.
 The first abstract library I made, which made it possible to program a website through a web browser/VeXX.
