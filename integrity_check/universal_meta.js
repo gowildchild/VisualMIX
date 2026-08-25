@@ -340,4 +340,83 @@ function executeCryptographicVerificationDiff() {
     reportPanel.innerHTML = htmlReport;
     writeLogToPanel(`Audit executed. Verdict Status: ${overallPassed ? 'PASS' : 'REJECTED_DRIFT'}`);
 }
+
+function evaluateWorkspaceState(metaJson, testJson) {
+    metaConfig = metaJson;
+    masterConfig = testJson;
+    
+    const profile = metaConfig.INTEGRITY_META_PROFILE || {};
+    currentAlgo = profile.selected_algorithm || "md5";
+    metaRegistryName = profile.target_registry_key || "CHECKSUM_HASH_REGISTRY";
+    
+    applyBitmaskPolicyConstraints(profile.options || {});
+    
+    const algoSel = document.getElementById("algo-select");
+    const statusEl = document.getElementById('file-status');
+    
+    if (algoSel) algoSel.value = currentAlgo;
+    if (statusEl) statusEl.innerHTML = `✅ Configuration Synced. Local system vectors active.`;
+    
+    // Explicitly lock onto tab meta view at startup footprint
+    switchConfigurationTab('meta');
+    
+    // Draw your requested initial ledger states side-by-side instantly 
+    renderInitialBaselineMetricsLedger();
+    setVisualLedStatus("green", "Ready to Verify");
+    generateAndShowChallenge();
+}
+
+function renderInitialBaselineMetricsLedger() {
+    const reportPanel = document.getElementById('report-panel');
+    if (!reportPanel || !masterConfig) return;
+
+    const schema = masterConfig.SYSTEM_BASELINE_CONFIG?.master_pipeline_schema;
+    if (!schema) return;
+
+    let htmlReport = "<h2>🔬 Dynamic Baseline Local Metrics Ledger</h2>";
+    htmlReport += "<table><tr><th>Target Component</th><th>Expected Signature</th><th>Status Matrix Monitoring</th></tr>";
+
+    const categories = Object.keys(schema).sort();
+    categories.forEach(longKey => {
+        let shortKey = longKey.replace("CATEGORY_", "").split("_");
+        const envelope = schema[longKey];
+        
+        // Calculate your expected baseline signatures natively from your loaded file blocks
+        const trueSrc = getCryptoHash(envelope.ground_truth_source, currentAlgo);
+        
+        // Render with standard "Found and OK" green telemetry states right on page startup
+        htmlReport += `<tr>
+            <td><b>${shortKey}</b> <span style="font-size:10px; color:var(--text-muted); display:block;">${envelope.component_name || 'Module'}</span></td>
+            <td><code style="color:var(--green)">${trueSrc}</code></td>
+            <td><span class="led-container"><div class="led-indicator led-green" style="width:8px; height:10px; margin-right:4px;"></div><span style="color:var(--green); font-size:11px;">FOUND AND OK</span></span></td>
+        </tr>`;
+    });
+    
+    htmlReport += "</table>";
+    reportPanel.innerHTML = htmlReport;
+}
+
+function switchConfigurationTab(targetTab) {
+    const btnMeta = document.getElementById("tab-btn-meta");
+    const btnSource = document.getElementById("tab-btn-source");
+    const viewMeta = document.getElementById("view-segment-meta");
+    const viewSource = document.getElementById("view-segment-source");
+    
+    if (!btnMeta || !btnSource || !viewMeta || !viewSource) return;
+
+    if (targetTab === 'meta') {
+        btnMeta.className = ""; // Highlight active tab frame natively
+        btnSource.className = "secondary";
+        viewMeta.className = "";
+        viewSource.className = "hidden-node";
+        writeLogToPanel("Workspace View: Toggled Master Meta Parameter configuration array display.");
+    } else {
+        btnMeta.className = "secondary";
+        btnSource.className = "";
+        viewMeta.className = "hidden-node";
+        viewSource.className = "";
+        writeLogToPanel("Workspace View: Toggled Protected Source blueprint asset configuration array display.");
+    }
+}
+
 function escapeHtml(text) { return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
