@@ -89,6 +89,12 @@
                 <button onclick="document.getElementById('local-log').innerHTML='';" class="secondary" style="padding: 4px 8px; font-size:11px;">Flush View Logs</button>
                 <button class="danger" onclick="executeFactoryResetPurge()" style="padding: 4px 8px; font-size:11px;">Purge Storage</button>
             </div>
+            <label>Selected Hashing Variant:</label>
+            <select id="algo-select" onchange="handleManualAlgoOverride()">
+                <option value="md5">MD5 (Fast / Verified)</option>
+                <option value="sha1">SHA-1 (Legacy)</option>
+                <option value="sha256">SHA-256 (Secure)</option>
+            </select>
         </div>
     </div>
 </body>
