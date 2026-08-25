@@ -27,7 +27,7 @@ jobs:
             - added|modified: '**/*.yml'
             - added|modified: '**/*.yaml'
           python:
-            - added|modified: 'master/tools/visualmix_integrity.py'
+            - added|modified: 'master/build-tools/visualmix_integrity.py'
 
     - name: Set up Environment | VisualMIX
       if: steps.filter.outputs.json == 'true' || steps.filter.outputs.yaml == 'true' || steps.filter.outputs.python == 'true'
@@ -79,7 +79,7 @@ jobs:
       if: steps.filter.outputs.python == 'true'
       run: |
         echo "[VALIDATING] Auditing modified Python Core files..."
-        python3 -m py_compile master/tools/visualmix_integrity.py
+        python3 -m py_compile master/build-tools/visualmix_integrity.py
         echo "[VALIDATED ✅] Python Compilation Core"
 
     - name: Validated Pipeline | VisualMIX
