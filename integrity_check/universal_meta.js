@@ -371,8 +371,11 @@ function executeCryptographicVerificationDiff() {
                     // Character-by-character mismatch scanning loop
                     let charOffset = 1;
                     let maxChars = Math.max(eLine.length, iLine.length);
-                    for (let c = 0; j = c < maxChars, c++) {
-                        if (eLine[c] !== iLine[c]) { charOffset = c + 1; break; }
+                    for (let c = 0; c < maxChars; c++) {
+                        if (eLine[c] !== iLine[c]) { 
+                            charOffset = c + 1; 
+                            break; 
+                        }
                     }
                     diffLog += `<span class="diff-del">Expected (Char ${charOffset}): ${escapeHtml(eLine)}</span><br/>`;
                     diffLog += `<span class="diff-add">Incoming (Char ${charOffset}): ${escapeHtml(iLine)}</span>`;
