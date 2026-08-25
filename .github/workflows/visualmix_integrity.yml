@@ -20,7 +20,7 @@ jobs:
 
     - name: VisualMIX | Integrity Check
       run: |
-        echo "[Verification: CHK]: Auditing codebase structures for compilation anomalies..."
+        echo "[Verification: CHK] Auditing codebase structures for compilation anomalies..."
         # Validates all workspace JSON files to trap any parsing breaks before local execution
         find . -name "*.json" -type f ! -name "sign_integrity_config.json" -exec python3 -m json.tool {} \; > /dev/null
         
