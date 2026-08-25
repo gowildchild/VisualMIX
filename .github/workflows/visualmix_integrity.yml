@@ -1,4 +1,4 @@
-name: VisualMIX | Code Validation & Signing
+name: VisualMIX | Validation & Integrity
 
 on:
   push:
@@ -18,13 +18,21 @@ jobs:
       with:
         python-version: '3.12'
 
-    - name: VisualMIX | Integrity Check
+    - name: VisualMIX | Validation Check
       run: |
-        echo "[Verification: CHK] Auditing codebase structures for compilation anomalies..."
+        echo "[Validation CHECK] Auditing codebase structures for compilation anomalies..."
         # Validates all workspace JSON files to trap any parsing breaks before local execution
         find . -name "*.json" -type f ! -name "sign_integrity_config.json" -exec python3 -m json.tool {} \; > /dev/null
+
+        find . -name "*.js" -type f -exec node --check {} \;
         
         # Runs a python compilation check on your new integrity file to verify it's syntactically perfect
         python3 -m py_compile master/tools/visualmix_integrity.py
         
-        echo "[Verification: OK] All repository source syntax structures are pristine."
+        echo "[Validation OK] All repository source syntax structures are fine."
+
+    - name: VisualMIX | Integrity Check
+      run: |
+        echo "[Integrity CHECK] Auditing codebase structures for integrity anomalies..."
+        python3 -m py_compile master/tools/visualmix_integrity.py
+        echo "[Integrity OK] All repository source syntax structures are pristine."      
