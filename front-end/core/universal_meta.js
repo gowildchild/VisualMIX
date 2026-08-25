@@ -238,12 +238,17 @@ function generateAndShowChallenge() {
     
     document.getElementById('challenge-output').value = JSON.stringify(challenge, null, 2);
 }
-function getCleanShortKey(longKey) {
+function getCleanShortestKey(longKey) {
     let parts = longKey.split("_");
     if (parts.length >= 2 && parts[0] === "CATEGORY") {
         return parts[0] + "_" + parts[1];
     }
     return longKey.replace("CATEGORY_", "");
+}
+
+function getCleanShortKey(longKey) {
+    if (!longKey) return "";
+    return String(longKey).replace("CATEGORY_", "");
 }
 
 function computeDetailedTextDiff(expectedStr, incomingStr) {
