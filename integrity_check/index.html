@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="universal_style.css">
     <link rel="stylesheet" href="universal_style_menu.css">
     <script src="https://cdn.jsdelivr.net/gh/gowildchild/VisualMIX@07d5fda/integrity_check/universal_crypto.js" defer></script>
-    <script src="https://cdn.jsdelivr.net/gh/gowildchild/VisualMIX@34deca0/integrity_check/universal_meta.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/gh/gowildchild/VisualMIX@a44ecda/integrity_check/universal_meta.js" defer></script>
 </head>
 <body>
     <nav class="top-navbar">
@@ -20,21 +20,59 @@
         </ul>
     </nav>
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VisualMIX | Zero-Trust Integrity Console</title>
+    <link rel="stylesheet" href="universal_style.css">
+    <link rel="stylesheet" href="universal_style_menu.css">
+    <style>
+        /* 🔬 Central Telemetry Beacon Custom Styles Matrix */
+        .beacon-workspace-layout { display: grid; grid-template-columns: 1fr; gap: 15px; position: relative; }
+        .central-beacon-wrapper { display: flex; justify-content: center; align-items: center; padding: 10px; background: var(--bg-panel); border: 1px solid var(--border); border-radius: 6px; }
+        .huge-led { width: 32px; height: 32px; border-radius: 50%; box-shadow: 0 0 12px rgba(0,0,0,0.6); transition: all 0.3s ease; }
+        .huge-green { background: var(--green); box-shadow: 0 0 24px var(--green); }
+        .huge-orange { background: var(--orange); box-shadow: 0 0 24px var(--orange); }
+        .huge-red { background: var(--red); box-shadow: 0 0 24px var(--red); }
+        
+        @media (min-width: 992px) {
+            .beacon-workspace-layout { grid-template-columns: 1fr 80px 1fr; }
+            .central-beacon-wrapper { flex-direction: column; height: 100%; border: none; background: transparent; padding: 0; }
+            .huge-led { width: 48px; height: 48px; position: sticky; top: 50%; transform: translateY(-50%); }
+        }
+    </style>
+    <script src="https://jsdelivr.net" defer></script>
+    <script src="https://jsdelivr.net" defer></script>
+</head>
+<body>
+    <!-- 🌐 Semantic HTML Navigation Menu Bar -->
+    <nav class="top-navbar">
+        <a href="#" class="nav-brand">VisualMIX Console</a>
+        <ul class="nav-menu">
+            <li class="nav-item active"><a href="check_integrity_meta.html">Integrity Interrogator</a></li>
+            <li class="nav-item"><a href="#">Bitshift Sandbox</a></li>
+            <li class="nav-item"><a href="https://github.com" target="_blank" rel="noopener">GitHub Project Repository</a></li>
+        </ul>
+    </nav>
+
     <div class="dashboard-container">
-        <!-- Status & Monitoring Bar -->
+        <!-- Status Monitoring Header Bar -->
         <div class="panel" style="flex-direction: row; justify-content: space-between; align-items: center; padding: 8px 12px;">
             <div class="led-container">
                 <div id="status-led" class="led-indicator led-orange"></div>
-                <span id="status-text">Booting VisualkMIX Engine</span>
+                <span id="status-text">Booting Engine</span>
             </div>
             <div style="font-size: 11px; color: var(--text-muted);" id="file-status">Initializing memory caches...</div>
         </div>
 
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 15px;">
+        <!-- 🏎️ The Integrated 4-Box Cockpit Space Matrix with Central Beacon -->
+        <div class="beacon-workspace-layout">
             
-            <!-- LEFT FLANK PANELS FRAME: Inputs and Check Intercept Boxes -->
+            <!-- LEFT COMPARTMENT: Configuration Controls Flank (Box 1 & Box 2) -->
             <div style="display: flex; flex-direction: column; gap: 15px;">
-                <!-- 🧩 Tabbed Container Panel (Houses both Box 1 and Box 2 symmetrically) -->
+                <!-- 🧩 Tabbed Container Panel -->
                 <div class="panel" id="configuration-workspace">
                     <div style="display: flex; gap: 10px; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 8px;">
                         <button id="tab-btn-meta" class="secondary" onclick="switchConfigurationTab('meta')" style="flex: 1; padding: 6px;">1. Master Meta Configuration</button>
@@ -51,7 +89,7 @@
                             <option value="DIRECT">DIRECT</option>
                         </select>
                         <div id="meta-url-container" class="hidden-node" style="margin-top: 6px;">
-                            <label>Active Meta Configuration Remote Resource URL Location Target:</label>
+                            <label>Active Meta Configuration Remote Resource URL Location:</label>
                             <input type="text" id="meta-url-field" placeholder="https://githubusercontent.com" onchange="syncPanelData('meta')">
                         </div>
                         <div id="meta-input-container" style="margin-top: 6px;">
@@ -71,7 +109,7 @@
                             <option value="DIRECT">DIRECT</option>
                         </select>
                         <div id="test-url-container" class="hidden-node" style="margin-top: 6px;">
-                            <label>Active Target Source Blueprint Remote Resource URL Location Target:</label>
+                            <label>Active Target Source Blueprint Remote Resource URL Location:</label>
                             <input type="text" id="test-url-field" placeholder="https://githubusercontent.com" onchange="syncPanelData('source')">
                         </div>
                         <div id="test-input-container" style="margin-top: 6px;">
@@ -93,7 +131,13 @@
                 </div>
             </div>
 
-            <!-- RIGHT FLANK PANELS FRAME: Challenges and Live Metrics Output -->
+            <!-- 🚨 THE CENTRAL BEACON COMPARTMENT: Scales from Middle on Desk to Center-Row on Phone -->
+            <div class="central-beacon-wrapper">
+                <div id="central-huge-led" class="huge-led huge-orange"></div>
+                <div style="font-size: 9px; color: var(--text-muted); font-weight: bold; margin-top: 6px; text-align: center; letter-spacing: 0.5px;">SYS GATE</div>
+            </div>
+
+            <!-- RIGHT COMPARTMENT: Active Outputs Flank (Box 3 & Live Ledger Metrics) -->
             <div style="display: flex; flex-direction: column; gap: 15px;">
                 <!-- 🧩 Box 3: CHALLENGE/ACTION output box panel -->
                 <div class="panel" id="workspace-action-zone">
