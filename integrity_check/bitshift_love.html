@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BitShift Love | VisualMIX</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/gowildchild/VisualMIX@main/front-end/ui/dirty_style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/gowildchild/VisualMIX@main/front-end/ui/dirty_menu.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/gowildchild/VisualMIX@main/front-end/telemetry/dirty_leds.css">
+    <script src="https://cdn.jsdelivr.net/gh/gowildchild/VisualMIX@main/front-end/core/universal_crypto.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/gh/gowildchild/VisualMIX@main/front-end/core/universal_meta.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/gh/gowildchild/VisualMIX@main/front-end/telemetry/dirty_tele.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/gh/gowildchild/VisualMIX@main/front-end/ui/engine_templates.js" defer></script> 
+</head>
+<body>
+    <nav class="top-navbar">
+        <a href="#" class="nav-brand">VisualMIX Console</a>
+        <ul class="nav-menu">
+            <li class="nav-item active"><a href="/VisualMIX/integrity_check/">Integrity Check</a></li>
+            <li class="nav-item"><a href="#">Bitshift Magic</a></li>
+            <li class="nav-item"><a href="https://github.com/gowildchild/existenZ/" target="_blank" rel="noopener">existenZ</a> | <a href="https://existenz.xsrv.net/" target="_blank" rel="noopener" title="Open Simulator Menu">SIMs</a></li>
+            <li class="nav-item"><a href="https://github.com/gowildchild/VisualMIX/" target="_blank" rel="noopener">GitHub Repository</a></li>
+        </ul>
+    </nav>
+
+    <div class="dashboard-container">
+        <!-- Telemetry Status Bar -->
+        <div class="panel" style="flex-direction: row; justify-content: space-between; align-items: center; padding: 8px 12px;">
+            <div class="led-container">
+                <div id="status-led" class="led-fixture led-c-blue fx-round fx-shiny"></div>
+                <span id="status-text" class="txt-blue" style="font-weight: bold;">SANDBOX READY</span>
+            </div>
+            <div style="font-size: 11px; color: var(--text-muted);" data-vm-translate="sandbox_title">Bitshift Sandbox Engine</div>
+        </div>
+
+        <!-- Master Two-Column Operational Layout Grid Workspace -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 15px;">
+            
+            <!-- LEFT COMPARTMENT: Bitwise Hardware Control Panel -->
+            <div style="display: flex; flex-direction: column; gap: 15px;">
+                <!-- 🧩 Box 1: Dynamic Data Inputs -->
+                <div class="panel glow-top-left" id="sandbox-inputs">
+                    <h2 class="txt-pink">1. Radix Core Ingestion Input</h2>
+                    
+                    <label>Raw Numeric Input Base String Value:</label>
+                    <input type="text" id="bit-input-value" placeholder="Enter integer, hex (0x...), or binary string..." style="font-family: monospace;">
+                    
+                    <div style="display: flex; gap: 10px; margin-top: 6px;">
+                        <div style="flex: 1;">
+                            <label>Target Radix Format Mode:</label>
+                            <select id="bit-input-radix">
+                                <option value="10">Decimal (Base-10)</option>
+                                <option value="16">Hexadecimal (Base-16)</option>
+                                <option value="2">Binary (Base-2)</option>
+                                <option value="8">Octal (Base-8)</option>
+                            </select>
+                        </div>
+                        <div style="flex: 1; text-align: center;">
+                            <label>Active Word Width:</label>
+                            <!-- Turning Knob Analogue Value Anchor -->
+                            <div class="rotary-knob-wrapper" style="margin: 0 auto;">
+                                <div class="rotary-dial" id="width-dial" style="transform: rotate(0deg);" title="Drag or Click to set width">
+                                    <div class="rotary-pointer"></div>
+                                </div>
+                                <span id="width-dial-display" style="font-family: monospace; font-size: 11px; color: var(--accent);">32-Bit</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 🧩 Box 2: Operator Mask Settings (HA Toggles & Halo Buttons) -->
+                <div class="panel glow-bottom-left" id="sandbox-operators">
+                    <h2>2. Bitmask Operational Modifiers</h2>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <!-- Home Assistant Style Slider Switch -->
+                        <div class="ha-switch-container" id="sw-logical-mask" onclick="this.classList.toggle('active')">
+                            <div class="ha-switch-track"><div class="ha-switch-thumb"></div></div>
+                            <label style="cursor: pointer;">Enforce Strict Logical Sign Boundaries</label>
+                        </div>
+
+                        <div class="ha-switch-container active" id="sw-overflow-guard" onclick="this.classList.toggle('active')">
+                            <div class="ha-switch-track"><div class="ha-switch-thumb"></div></div>
+                            <label style="cursor: pointer;">Enable Zero-Trust Overflow Guard Rails</label>
+                        </div>
+                    </div>
+
+                    <label style="margin-top: 10px;">Select Shift Routing Action Target:</label>
+                    <div style="display: flex; gap: 10px; justify-content: space-around; margin-top: 4px;">
+                        <button class="halo-btn hl-green active" id="halo-op-lsh" title="Shift Left">LSH</button>
+                        <button class="halo-btn hl-blue" id="halo-op-rsh" title="Logical Shift Right">RSH</button>
+                        <button class="halo-btn hl-pink" id="halo-op-rol" title="Rotate Left">ROL</button>
+                        <button class="halo-btn hl-yellow" id="halo-op-ror" title="Rotate Right">ROR</button>
+                    </div>
+                    
+                    <label style="margin-top: 8px;">Shift Iteration Offset Count (Bits Slider):</label>
+                    <input type="range" id="bit-shift-slider" min="0" max="31" value="1" style="width: 100%;">
+                    <div style="text-align: right; font-family: monospace; font-size: 11px;" id="slider-display">1 Bit</div>
+                </div>
+            </div>
+
+            <!-- RIGHT COMPARTMENT: Live Mathematical Calculations & Telemetry Reports -->
+            <div style="display: flex; flex-direction: column; gap: 15px;">
+                <!-- 🧩 Box 3: 3D Tactical Action Execution Console -->
+                <div class="panel glow-top-right" id="sandbox-actions">
+                    <h2>3. Compute Execution Runway</h2>
+                    <label>Dynamic Mask Array Vector Config:</label>
+                    <input type="text" id="bitmask-vector" placeholder="0xFFFFFFFF" style="font-family: monospace;">
+                    
+                    <div style="margin-top: auto; display: flex; flex-direction: column; gap: 8px;">
+                        <!-- Tactile 3D Depth Button Integration -->
+                        <button class="btn3d" style="width: 100%; background: var(--green); color: white;" onclick="triggerBitwiseSandboxCalculation()">
+                            RUN SINGLE-CYCLE ARITHMETIC COMPUTATION PASS
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 🧩 Box 4: Dynamic Metrics Output Ledger -->
+                <div class="panel glow-bottom-right" id="report-panel" style="background: var(--bg-input); min-height: 232px;">
+                    <h2>4. Multi-Radix Transformation Ledger</h2>
+                    <div id="sandbox-results-area" style="font-family: monospace; font-size: 12px; margin-top: 10px;">
+                        <p style="color: var(--text-muted); font-style: italic; text-align: center; margin-top: 50px;">
+                            Awaiting register operation ticks to evaluate transformation metrics...
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- System Debug Diagnostic Log Panel -->
+        <div class="panel">
+            <h2>System Debug Diagnostic Execution Log</h2>
+            <div id="local-log" class="log-box"></div>
+            <button onclick="document.getElementById('local-log').innerHTML='';" class="secondary" style="padding: 4px 8px; font-size:11px; width: 120px;">Flush View Logs</button>
+        </div>
+    </div>
+</body>
+</html>
