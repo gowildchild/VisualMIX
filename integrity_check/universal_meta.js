@@ -338,11 +338,10 @@ function executeCryptographicVerificationDiff() {
         return;
     }
 
-    // Dynamic extraction helper to isolate short key mappings safely (e.g. "CATEGORY_A")
     function getCleanShortKey(longKey) {
         let parts = longKey.split("_");
         if (parts.length >= 2 && parts[0] === "CATEGORY") {
-            return parts[0] + "_" + parts[1];
+            return parts[0] + "_" + parts[1]; // Correctly extracts and returns "CATEGORY_A"
         }
         return longKey.replace("CATEGORY_", "").split("_")[0];
     }
