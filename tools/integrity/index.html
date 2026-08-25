@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VisualMIX | Integrity Check Console</title>
+    <title>VisualMIX | Integrity Check Console</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/gowildchild/VisualMIX@main/front-end/ui/dirty_style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/gowildchild/VisualMIX@main/front-end/ui/dirty_menu.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/gowildchild/VisualMIX@main/front-end/telemetry/dirty_leds.css">
+    <script src="https://cdn.jsdelivr.net/gh/gowildchild/VisualMIX@main/front-end/core/universal_crypto.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/gh/gowildchild/VisualMIX@main/front-end/core/universal_meta.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/gh/gowildchild/VisualMIX@main/front-end/telemetry/dirty_tele.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/gh/gowildchild/VisualMIX@main/front-end/ui/engine_templates.js" defer></script> 
+</head>
+<body>
+    <nav class="top-navbar">
+        <a href="#" class="nav-brand">VisualMIX Console</a>
+        <ul class="nav-menu">
+            <li class="nav-item active"><a href="/tools/integrity/" title="Zero-Trust Integrity Check Console">Integrity Check</a></li>
+            <li class="nav-item"><a href="/tools/bitshift-love/">Bitshift Magic</a></li>
+            <li class="nav-item"><a href="https://github.com/gowildchild/existenZ/" target="_blank" rel="noopener">existenZ</a> | <a href="https://existenz.xsrv.net/" target="_blank" rel="noopener" title="Open Simulator Menu">SIMs</a></li>
+            <li class="nav-item"><a href="https://github.com/gowildchild/VisualMIX/" target="_blank" rel="noopener">GitHub Repository</a></li>
+        </ul>
+    </nav>
+
+    <div class="dashboard-container">
+        <!-- Status Monitoring Header Bar -->
+        <div class="panel" style="flex-direction: row; justify-content: space-between; align-items: center; padding: 8px 12px;">
+            <div class="led-container">
+                <div id="status-led" class="led-fixture fx-round fx-shiny fx-wave br-high led-c-orange"></div>
+                <span id="status-text">Booting Engine</span>
+            </div>
+            <div style="font-size: 11px; color: var(--text-muted);" id="file-status">Initializing memory caches...</div>
+        </div>
+
+        <!-- Master Two-Column Operational Layout Grid Workspace -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 15px;">
+            
+            <!-- LEFT COMPARTMENT: Configuration Controls Flank (Box 1, Box 2 & Box 4) -->
+            <div style="display: flex; flex-direction: column; gap: 15px;">
+                <!-- 🧩 Tabbed Container Panel (Box 1 & Box 2 Symmetrical Inner Corner Glow) -->
+                <div class="panel glow-top-left" id="configuration-workspace">
+                    <div style="display: flex; gap: 10px; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 8px;">
+                        <button id="tab-btn-meta" class="secondary" onclick="switchConfigurationTab('meta')" style="flex: 1; padding: 6px;">1. Master Meta Configuration</button>
+                        <button id="tab-btn-source" class="secondary" onclick="switchConfigurationTab('source')" style="flex: 1; padding: 6px;">2. Protected Source Blueprint</button>
+                    </div>
+
+                    <!-- Inner Box 1 Panel View Segment -->
+                    <div id="view-segment-meta">
+                        <label for="meta-source-select">Meta Profile Ingestion Route Select:</label>
+                        <select id="meta-source-select" onchange="togglePanelNodeVisibility('meta')"></select>
+                        <div id="meta-url-container" class="hidden-node" style="margin-top: 6px;">
+                            <label for="meta-url-field">Active Meta Configuration Remote Resource URL Location:</label>
+                            <input type="text" id="meta-url-field" placeholder="https://githubusercontent.com" onchange="syncPanelData('meta')">
+                        </div>
+                        <div id="meta-input-container" style="margin-top: 6px;">
+                            <label for="meta-json-area">Raw Meta Configuration Script Payload Editor Buffer:</label>
+                            <textarea id="meta-json-area" placeholder="Awaiting master meta-profile definition dataset ingestion loop..." oninput="handleTypingState('meta')" style="height: 160px;"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Inner Box 2 Panel View Segment -->
+                    <div id="view-segment-source" class="hidden-node">
+                        <label for="test-source-select">Source Blueprint Ingestion Route Select:</label>
+                        <select id="test-source-select" onchange="togglePanelNodeVisibility('source')"></select>
+                        <div id="test-url-container" class="hidden-node" style="margin-top: 6px;">
+                            <label for="test-url-field">Active Target Source Blueprint Remote Resource URL Location:</label>
+                            <input type="text" id="test-url-field" placeholder="https://githubusercontent.com" onchange="syncPanelData('source')">
+                        </div>
+                        <div id="test-input-container" style="margin-top: 6px;">
+                            <label for="test-json-area">Raw Target Source Blueprint Script Payload Editor Buffer:</label>
+                            <textarea id="test-json-area" placeholder="Awaiting target workspace blueprint dataset ingestion loop..." oninput="handleTypingState('source')" style="height: 160px;"></textarea>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 8px; margin-top: 8px;">
+                        <button class="secondary" onclick="triggerProfileBackupExport()" style="font-size: 11px; padding: 4px 8px;">Backup Profiles</button>
+                    </div>
+                </div>
+
+                <!-- PANEL 4: Session Token Intercept Check -->
+                <div class="panel glow-bottom-left" id="panel-box-4">
+                    <h2>4. Session Token Intercept Check</h2>
+                    <label for="session-input">Pasted Clipboard Session Intercept Snapshot Container Area:</label>
+                    <textarea id="session-input" placeholder="Paste live AI response variables block directly here..." style="height: 140px; margin-bottom: 8px;"></textarea>
+                    <button onclick="executeCryptographicVerificationDiff()">Execute Cryptographic Evaluation Diff</button>
+                </div>
+            </div>
+
+            <!-- RIGHT COMPARTMENT: Active Outputs Flank (Box 3 & Live Ledger Metrics) -->
+            <div style="display: flex; flex-direction: column; gap: 15px;">
+                <!-- 🧩 Box 3: CHALLENGE/ACTION output box panel -->
+                <div class="panel glow-top-right" id="workspace-action-zone">
+                    <h2>3. Verification Challenge Output</h2>
+                    <label for="action-strategy-select">Target Execution Strategy Action Selector:</label>
+                    <select id="action-strategy-select" onchange="handleActionStrategySwap()"></select>
+                    <label for="challenge-output">Active Copypaste Buffer Code Vector Prompt String:</label>
+                    <textarea id="challenge-output" readonly onclick="this.select()" style="height: 184px; background: var(--bg-input); font-size:11px;"></textarea>
+                </div>
+
+                <!-- 🧩 Real-Time Metrics Panel -->
+                <div id="report-panel" class="panel glow-bottom-right" style="background: var(--bg-input); min-height: 232px;">
+                    <h2>🔬 Dynamic Baseline Local Metrics Ledger</h2>
+                    <p style="color: var(--text-muted); font-style: italic; text-align: center; margin-top: 60px;">Awaiting baseline file parsing loops to render verification metrics...</p>
+                </div>
+            </div>
+        </div>
+
+            <div class="panel" id="cockpit-calibration-panel">
+                <h2>🛠️ Console Calibration Matrix</h2>
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <div>
+                        <label>LED Indicator Glass Fixture Geometry:</label>
+                        <select id="ctrl-led-fixture" onchange="applyLiveTelemetryCalibration()" style="width: 100%;">
+                            <option value="fx-round fx-shiny">Round Lens Gloss Glare</option>
+                            <option value="fx-round fx-matte">Round Matte Solid Core</option>
+                            <option value="fx-round fx-shiny fx-wave">Round Shiny + Light Wave Ripple</option>
+                            <option value="fx-rect fx-matte">Rectangular Matte Dashboard Slot</option>
+                            <option value="fx-rect fx-shiny">Rectangular Shiny Indicator Glass</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>LED Core Telemetry Activity Loop:</label>
+                        <select id="ctrl-led-blink" onchange="applyLiveTelemetryCalibration()" style="width: 100%;">
+                            <option value="static">Static Continuous Solid Trace</option>
+                            <option value="led-blink">Blinking Intermittent Alert Pulse</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>LED Diode Luminous Flux (Brightness):</label>
+                        <select id="ctrl-led-bright" onchange="applyLiveTelemetryCalibration()" style="width: 100%;">
+                            <option value="br-low">Low (Dim Ambient Stealth)</option>
+                            <option value="br-med" selected>Medium (Standard Baseline Nominal)</option>
+                            <option value="br-high">High (Bright Emissive Glare)</option>
+                            <option value="br-ultra">Ultra (Max Intensity Laser Bleed)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Workspace Panels Baseline Isolation Density (Opacity):</label>
+                        <select id="ctrl-panel-op" onchange="applyLiveTelemetryCalibration()" style="width: 100%;">
+                            <option value="op-0">Opaque (100% Solid Boundary)</option>
+                            <option value="op-20" selected>Translucent Glass (80% Density Profile)</option>
+                            <option value="op-40">Deep Sheer Mesh (60% Density Profile)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT ENGINE CELL: Un-Bloated Scrolling Debug System Log Panel -->
+            <div class="panel" id="system-log-display-container">
+                <h2>System Debug Diagnostic Execution Log</h2>
+                <div id="local-log" class="log-box" style="height: 180px; overflow-y: auto; background: var(--bg-input); padding: 8px; border-radius: 4px; font-family: monospace; font-size: 11px; margin-bottom: 8px;"></div>
+                <div style="display:flex; justify-content:space-between; align-items: center; gap:10px; flex-wrap: wrap; margin-top: auto;">
+                    <div style="display:flex; gap:8px;">
+                        <button onclick="document.getElementById('local-log').innerHTML='';" class="secondary" style="padding: 4px 8px; font-size:11px;">Flush View Logs</button>
+                        <button class="danger" onclick="executeFactoryResetPurge()" style="padding: 4px 8px; font-size:11px;">Purge Storage</button>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <label style="margin:0; font-size:11px;">Core Hashing Core:</label>
+                        <select id="algo-select" onchange="handleManualAlgoOverride()" style="margin:0; width:110px; font-size:11px; padding: 2px;">
+                            <option value="md5">MD5</option>
+                            <option value="sha1">SHA-1</option>
+                            <option value="sha256">SHA-256</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+</body>
+</html>
