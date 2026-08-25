@@ -46,8 +46,8 @@ function initializeStaticDropdownMenus() {
     }
     if (testSelect && testSelect.options.length === 0) {
         const options = [
-            ["json_src_challenge", "json_src_challenge"],
-            ["json_src_integrity", "json_src_integrity"],
+            ["json_meta_challenge", "json_meta_challenge"],
+            ["json_meta_integrity", "json_meta_integrity"],
             ["URL", "URL"],
             ["INPUT", "INPUT"],
             ["DIRECT", "DIRECT"]
@@ -96,7 +96,7 @@ function togglePanelNodeVisibility(panelType) {
             inputField.className = "panel";
         }
 
-        if (mode === "json_src_challenge" || mode === "json_src_integrity" || mode === "DIRECT") {
+        if (mode === "json_meta_challenge" || mode === "json_meta_integrity" || mode === "DIRECT") {
             triggerRemoteUrlFetchSync();
         }
     }
@@ -110,9 +110,9 @@ function handleActionStrategySwap() {
     
     if (testSourceSelect) {
         if (activeStrategy === "CHALLENGE") {
-            testSourceSelect.value = "json_src_challenge";
+            testSourceSelect.value = "json_meta_challenge";
         } else if (activeStrategy === "INTEGRITY") {
-            testSourceSelect.value = "json_src_integrity";
+            testSourceSelect.value = "json_meta_integrity";
         }
         localStorage.setItem("cache_test_source_mode", testSourceSelect.value);
     }
@@ -215,7 +215,7 @@ function applyBitmaskPolicyConstraints(optionsBlock) {
     }
     
     populateDynamicDropdown("meta-source-select", optionsBlock.meta || ["JSON_FILE", "URL", "INPUT", "DIRECT"]);
-    populateDynamicDropdown("test-source-select", optionsBlock.source || ["json_src_challenge", "json_src_integrity", "URL", "INPUT", "DIRECT"]);
+    populateDynamicDropdown("test-source-select", optionsBlock.source || ["json_meta_challenge", "json_meta_integrity", "URL", "INPUT", "DIRECT"]);
     populateDynamicDropdown("action-strategy-select", optionsBlock.action || ["CHALLENGE", "INTEGRITY"]);
     populateDynamicDropdown("check-syntax-select", optionsBlock.check || ["MD5:CATEGORY_A"]);
 }
@@ -297,11 +297,16 @@ function executeCryptographicVerificationDiff() {
         incoming = JSON.parse(text);
     } catch(e) {
         setVisualLedStatus("orange", "Faulty Intercept");
-        reportPanel.innerHTML = "<h3>❌ CRITICAL DATA DISCONNECT: Pasted payload is structurally corrupt.</h3>";
+        reportPanel.innerHTML = "<h3>❌ CRITICAL DATA DISCONNECT: Pasted snapshot is structurally corrupt.</h3>";
         return;
     }
 
-    // 🔍 Line-by-Line Character Diff Engine Tracker
+    // 🔑 FIXED: True string matching lookup that handles ANY key variant cleanly (MD5, SHA-1, or SHA-256)
+    function getCleanShortKey(longKey) {
+        if (!longKey) return "";
+        return String(longKey).replace("CATEGORY_", "");
+    }
+
     function computeDetailedTextDiff(expectedStr, incomingStr, label) {
         let expLines = String(expectedStr).split("\n");
         let incLines = String(incomingStr).split("\n");
@@ -318,9 +323,9 @@ function executeCryptographicVerificationDiff() {
                 diffLog += `<b>📍 Line ${lineNum} Drift [${label}]:</b><br/>`;
 
                 if (eLine === null) {
-                    diffLog += `<span style="color:var(--green)">[+] Added: ${escapeHtml(iLine)}</span>`;
+                    diffLog += `<span style="color:var(--green)">[+] Added line: ${escapeHtml(iLine)}</span>`;
                 } else if (iLine === null) {
-                    diffLog += `<span style="color:var(--red)">[-] Deleted: ${escapeHtml(eLine)}</span>`;
+                    diffLog += `<span style="color:var(--red)">[-] Deleted line: ${escapeHtml(eLine)}</span>`;
                 } else {
                     let charOffset = 1;
                     let maxChars = Math.max(eLine.length, iLine.length);
@@ -336,19 +341,15 @@ function executeCryptographicVerificationDiff() {
         return diffLog;
     }
 
-    // 🧭 Universal Structure Crawer: Flattens any incoming JSON object tree into pure hashable string key/value pairs
     function flattenStructureMap(obj, prefix = "", targetMap = {}) {
         if (obj === null || obj === undefined) return targetMap;
-        
         if (typeof obj !== "object") {
             targetMap[prefix] = obj;
             return targetMap;
         }
-
         for (let key in obj) {
             if (Object.prototype.hasOwnProperty.call(obj, key)) {
                 let cleanKey = prefix ? `${prefix}.${key}` : key;
-                // If it's a structural leaf or source string block, anchor it
                 if (typeof obj[key] !== "object" || obj[key] === null) {
                     targetMap[cleanKey] = obj[key];
                 } else {
@@ -359,25 +360,22 @@ function executeCryptographicVerificationDiff() {
         return targetMap;
     }
 
-    // Map structural topologies for both your expected baseline and your target inputs
     const masterMap = flattenStructureMap(masterConfig);
     const incomingMap = flattenStructureMap(incoming);
 
-    let htmlReport = "<h2>MINORITY REPORT (UNIVERSAL STRUCT ENGINE)</h2>";
+    let htmlReport = "<h2>🔬 LIVE ZERO-TRUST MINORITY REPORT (UNIVERSAL STRUCT ENGINE)</h2>";
     let codeDiffs = "", overallPassed = true;
-    let tableHtml = "<table><tr><th>Target Structural Node Pathway</th><th>Expected Baseline Value / Hash</th><th>Incoming Payload Value / Hash</th><th>Status Matrix Monitoring</th></tr>";
+    let tableHtml = "<table><tr><th>Target Structural Node Pathway</th><th>Expected Baseline Hash</th><th>Incoming Payload Hash</th><th>Status Matrix Monitoring</th></tr>";
 
-    // Sort key paths deterministically to preserve matrix lines mapping symmetry
     const uniqueKeys = Array.from(new Set([...Object.keys(masterMap), ...Object.keys(incomingMap)])).sort();
 
     uniqueKeys.forEach(pathKey => {
-        // Skip metadata configuration block headers to clean the terminal display logs
         if (pathKey.includes("visualmixMeta") || pathKey.includes("INTEGRITY_META_PROFILE")) return;
 
         const valExpected = masterMap[pathKey] !== undefined ? String(masterMap[pathKey]) : null;
         const valIncoming = incomingMap[pathKey] !== undefined ? String(incomingMap[pathKey]) : null;
 
-        // Dynamic algorithm loop assignment hashes text nodes if they span multi-line modules
+        // 🔑 FIXED: Dynamic multi-algo assignment passes currentAlgo straight down to universal_crypto.js
         const hashExpected = valExpected && valExpected.includes("\n") ? getCryptoHash(valExpected, currentAlgo) : valExpected;
         const hashIncoming = valIncoming && valIncoming.includes("\n") ? getCryptoHash(valIncoming, currentAlgo) : valIncoming;
 
@@ -385,15 +383,14 @@ function executeCryptographicVerificationDiff() {
         if (!isMatch) overallPassed = false;
 
         const stateColor = isMatch ? "green" : "red";
-        const stateLabel = isMatch ? "OK" : "MUTATED";
+        const stateLabel = isMatch ? "FOUND AND OK" : "MUTATED DRIFT";
 
-        // Generate line-by-character structural diff tracing blocks if code drifts are captured
         if (!isMatch && valExpected && valIncoming) {
             codeDiffs += `<h3>📍 Node Path Shift Trapped: ${pathKey}</h3>`;
             codeDiffs += `<div style="background: var(--bg-input); padding: 8px; border-radius: 4px; margin-bottom:10px;">${computeDetailedTextDiff(valExpected, valIncoming, pathKey)}</div>`;
         }
 
-        // 🔘 HARD-WELDED: Pure Round, Shiny Gloss Indicator Fixtures Injecting into Table Row Arrays
+        // 🔑 FIXED: Keeps round reflective indicator glass completely dynamic across ANY custom configuration struct!
         tableHtml += `<tr>
             <td><code style="color:var(--accent); font-size:11px;">${pathKey}</code></td>
             <td style="color:${isMatch?'var(--green)':'var(--red)'}; font-family:monospace; max-width:180px; overflow:hidden; text-overflow:ellipsis;">${hashExpected || 'NULL/MISSING'}</td>
