@@ -1,5 +1,5 @@
 ////////////////////
-// VisualMIX Meta Java v0.0.4
+// VisualMIX Meta Java v0.0.5a
 // (c)2007-2026 by Gunther Voet
    ////////////////////////////// 
 
@@ -64,16 +64,49 @@ function initializeStaticDropdownMenus() {
     }
 }
 
-function toggleSourceInterfaceVisibility(panelType) {
+function togglePanelNodeVisibility(panelType) {
     if (panelType === 'meta') {
         const mode = document.getElementById("meta-source-select").value;
         localStorage.setItem("cache_meta_source_mode", mode);
-        writeLogToPanel(`Meta source selector adjusted manually to: ${mode}`);
+        writeLogToPanel(`Meta Ingestion Option Selected: [${mode}]`);
+
+        // Capture layout node container references from the HTML structure
+        const urlField = document.getElementById("meta-url-container");
+        const inputField = document.getElementById("meta-input-container");
+
+        if (urlField && inputField) {
+            // Reveal text input box if URL mode is active, reveal textarea box if INPUT is active
+            urlField.className = (mode === "URL") ? "panel" : "hidden-node";
+            inputField.className = (mode === "INPUT") ? "panel" : "hidden-node";
+        }
+        
+        // Waterfall trigger: automatically fire a background re-sync if defaults are requested
+        if (mode === "JSON_FILE" || mode === "DIRECT") {
+            triggerRemoteUrlFetchSync();
+        }
+
     } else if (panelType === 'source') {
         const mode = document.getElementById("test-source-select").value;
         localStorage.setItem("cache_test_source_mode", mode);
-        writeLogToPanel(`Source blueprint selector adjusted manually to: ${mode}`);
+        writeLogToPanel(`Source Ingestion Option Selected: [${mode}]`);
+
+        const urlField = document.getElementById("test-url-container");
+        const inputField = document.getElementById("test-input-container");
+
+        if (urlField && inputField) {
+            urlField.className = (mode === "URL") ? "panel" : "hidden-node";
+            inputField.className = (mode === "INPUT") ? "panel" : "hidden-node";
+        }
+
+        if (mode === "json_meta_challenge" || mode === "json_meta_integrity" || mode === "DIRECT") {
+            triggerRemoteUrlFetchSync();
+        }
     }
+}
+
+// 🌐 Double-binding alias wrapper to support the exact naming hooks inside your HTML document file code
+function toggleSourceInterfaceVisibility(panelType) {
+    togglePanelNodeVisibility(panelType);
 }
 
 function syncPanelData(panelType) {
