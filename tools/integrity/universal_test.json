@@ -1,6 +1,6 @@
 {
   "SYSTEM_BASELINE_CONFIG": {
-    "version": "v0.3",
+    "version": "v0.6a",
     "protocol": "SELF_CORRECTING_HASH_AUDIT",
     "trigger_keyword": "AI_INTEGRITY_AUDIT",
     "verification_mode": "AI_INTEGRITY_CHECK",
