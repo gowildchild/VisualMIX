@@ -1,6 +1,6 @@
 /** 
  * * LIGHT  E M I T T I N G  DISPLAYS  - LEDs     v0.3
- *** Glow & Status LED Engine            VisualMIX/front_end/telemetry.css
+ *** Glow & Status LED Engine            VisualMIX/front_end/telemetry/dirty_leds.css
  ** (c)2006-2012 Gunther Voet
 **/
 
@@ -29,16 +29,15 @@
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.led-fixture.fx-round { border-radius: 50%; } /* 🔘 Fixture Type A: Standard Round */
-.led-fixture.fx-rect { width: 14px; height: 8px; border-radius: 2px; } /* ⏹️ Fixture Type B: Rectangular Dashboard Slot */
-.led-fixture.fx-matte { border: 1px solid rgba(255,255,255,0.08); filter: saturate(1.1); } /* 🔴 Fixture Type C: Matte (Flat, High-Density Internal Color) */
-.led-fixture.fx-shiny::after {                   /* 🌟 Fixture Type D: Shiny Lens (High-Gloss Internal Flare Overlay) */
-
+.led-fixture.fx-round { border-radius: 50%; }
+.led-fixture.fx-rect { width: 14px; height: 8px; border-radius: 2px; }
+.led-fixture.fx-matte { border: 1px solid rgba(255,255,255,0.08); filter: saturate(1.1); }
+.led-fixture.fx-shiny::after {
     content: ""; position: absolute; top: 1.5px; left: 2px; width: 4px; height: 3px;
     background: rgba(255, 255, 255, 0.65); border-radius: 50% 50% 40% 40%; transform: rotate(-15deg);
 }
 
-.led-fixture.fx-wave::before { /* 🌊 Fixture Type E: Ripple Wave Ring Overlay */
+.led-fixture.fx-wave::before {
     content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
     border-radius: inherit; border: 1.5px solid var(--led-glow-color, currentColor);
     animation: led-wave-pulse 2.5s infinite cubic-bezier(0.1, 0.8, 0.3, 1);
@@ -71,8 +70,6 @@
 .panel.op-20  { background: rgba(22, 27, 34, 0.80) !important; backdrop-filter: blur(8px); }
 .panel.op-40  { background: rgba(22, 27, 34, 0.60) !important; backdrop-filter: blur(12px); }
 
-
-/* Base Panel Reactive Alignment Tweaks */
 .panel {
     transition: box-shadow 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), 
                 border-color 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
@@ -82,8 +79,8 @@
 .txt-orange { color: var(--orange) !important; }
 .txt-red    { color: var(--red)    !important; }
 .txt-blue   { color: var(--blue)   !important; }
-.txt-yellow { color: #f1e05a       !important; } /* High-visibility Alert Yellow */
-.txt-pink   { color: #ff79c6       !important; } /* Deep Matrix Existenz Cyber Pink */
+.txt-yellow { color: #f1e05a       !important; } 
+.txt-pink   { color: #ff79c6       !important; } 
 
 .panel.glow-top-left.state-green:hover     { border-bottom-right-radius: 12px; border-color: rgba(63,185,80,0.5); box-shadow: 12px 12px 28px -8px rgba(63,185,80,0.35); }
 .panel.glow-bottom-left.state-green:hover  { border-top-right-radius: 12px;    border-color: rgba(63,185,80,0.5); box-shadow: 12px -12px 28px -8px rgba(63,185,80,0.35); }
