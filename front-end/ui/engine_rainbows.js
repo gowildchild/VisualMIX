@@ -4,6 +4,58 @@
  * (c)2006-2012 Gunther Voet | Integrated for VisualMIX
  */
 
+
+function triggerRainbowAnimation() {
+  document.querySelectorAll('.rainbow-title').forEach(function(title) {
+    title.classList.add('is-loading');
+  });
+}
+
+function terminateRainbowAnimation() {
+  document.querySelectorAll('.rainbow-title').forEach(function(title) {
+    title.classList.remove('is-loading');
+  });
+}
+
+$(document).ready(function() {
+  $(document).on('click touchstart', 'button, .btn, .btn3d, a', function(event) {
+
+    if (this.disabled || this.classList.contains('disabled')) {
+      return;
+    }
+
+    var hasBootstrapToggle = this.hasAttribute('data-bs-toggle') ||
+                             this.hasAttribute('data-toggle') ||
+                             this.classList.contains('dropdown-toggle') ||
+                             this.getAttribute('href') === '#' ||
+                             this.getAttribute('href') === 'javascript:void(0);';
+
+    if (hasBootstrapToggle) {
+      return;
+    }
+
+    triggerRainbowAnimation();
+
+    setTimeout(function() {
+      if (event.isDefaultPrevented()) {
+        terminateRainbowAnimation();
+      }
+    }, 1);
+  });
+
+  $(document).on('submit', 'form', function(event) {
+    setTimeout(function() {
+      if (event.isDefaultPrevented()) {
+        terminateRainbowAnimation();
+      }
+    }, 1);
+  });
+});
+
+window.addEventListener('pageshow', function() { terminateRainbowAnimation(); });
+document.addEventListener('invalid', function() { terminateRainbowAnimation(); }, true);
+
+
 const RainbowEngine = {
     // Current application-wide runtime state
     state: {
