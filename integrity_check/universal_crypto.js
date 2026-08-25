@@ -1,7 +1,8 @@
-////////////////////
-// VisualMIX Crypto Java v0.0.4
-// (c)2007-2026 by Gunther Voet
-   ////////////////////////////// 
+/** 
+ * * VisualMIX Cryptographics and Integrity v0.0.4
+ *** Checking and Signing routines          VisualMIX/front_end/hs/universal_crypto.js
+ ** (c)2007-2012 Gunther Voet
+**/
 
 function interpretAsSignedDecimal(valueInput, maxBits = 32) {
     let val = BigInt(parseAnyToDecimal(valueInput));
