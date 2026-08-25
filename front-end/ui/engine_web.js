@@ -1,5 +1,5 @@
 /** 
- * * VisualMIX Engine WWW v0.1
+ * * VisualMIX Engine WWW v0.0.6
  *** Quick-n-Dirty WWW Routines            VisualMIX/front_end/ui/engine_www.js
  ** (c)2006-2012 Gunther Voet
 **/
