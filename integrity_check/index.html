@@ -10,6 +10,16 @@
     <script src="https://cdn.jsdelivr.net/gh/gowildchild/VisualMIX@main/integrity_check/universal_meta.js" defer></script>
 </head>
 <body>
+    <!-- 🌐 Semantic HTML Navigation Menu Bar -->
+    <nav class="top-navbar">
+        <a href="#" class="nav-brand">VisualMIX Console</a>
+        <ul class="nav-menu">
+            <li class="nav-item active"><a href="check_integrity_meta.html">Integrity Interrogator</a></li>
+            <li class="nav-item"><a href="#">Bitshift Sandbox</a></li>
+            <li class="nav-item"><a href="https://github.com" target="_blank" rel="noopener">GitHub Project Repository</a></li>
+        </ul>
+    </nav>
+
     <div class="dashboard-container">
         <!-- Status & Monitoring Bar -->
         <div class="panel" style="flex-direction: row; justify-content: space-between; align-items: center; padding: 8px 12px;">
@@ -26,12 +36,17 @@
             <div class="panel" id="panel-meta">
                 <h2>1. Master Meta Configuration</h2>
                 <label>Ingestion Route Select:</label>
-                <select id="meta-source-select" onchange="togglePanelNodeVisibility('meta')"></select>
+                <select id="meta-source-select" onchange="togglePanelNodeVisibility('meta')">
+                    <option value="JSON_FILE">JSON_FILE</option>
+                    <option value="URL">URL</option>
+                    <option value="INPUT">INPUT</option>
+                    <option value="DIRECT">DIRECT</option>
+                </select>
                 <div id="meta-url-container" class="hidden-node">
                     <label>Remote Profile URL Location:</label>
                     <input type="text" id="meta-url-field" onchange="syncPanelData('meta')">
                 </div>
-                <div id="meta-input-container" class="hidden-node">
+                <div id="meta-input-container">
                     <label>Manual Text Payload State Buffer:</label>
                     <textarea id="meta-json-area" placeholder="Paste check_integrity_meta.json array..." oninput="handleTypingState('meta')"></textarea>
                 </div>
@@ -44,12 +59,18 @@
             <div class="panel" id="panel-source">
                 <h2>2. Protected Source Blueprint</h2>
                 <label>Ingestion Route Select:</label>
-                <select id="test-source-select" onchange="togglePanelNodeVisibility('source')"></select>
+                <select id="test-source-select" onchange="togglePanelNodeVisibility('source')">
+                    <option value="json_meta_challenge">json_meta_challenge</option>
+                    <option value="json_meta_integrity">json_meta_integrity</option>
+                    <option value="URL">URL</option>
+                    <option value="INPUT">INPUT</option>
+                    <option value="DIRECT">DIRECT</option>
+                </select>
                 <div id="test-url-container" class="hidden-node">
                     <label>Remote Workspace URL Location:</label>
                     <input type="text" id="test-url-field" onchange="syncPanelData('source')">
                 </div>
-                <div id="test-input-container" class="hidden-node">
+                <div id="test-input-container">
                     <label>Manual Text Payload State Buffer:</label>
                     <textarea id="test-json-area" placeholder="Paste check_integrity_test.json array..." oninput="handleTypingState('source')"></textarea>
                 </div>
@@ -85,7 +106,7 @@
         <div class="panel">
             <h2>System Debug Diagnostic Execution Log</h2>
             <div id="local-log" class="log-box"></div>
-            <div style="display:flex; justify-content:space-between; gap:10px;">
+            <div style="display:flex; justify-content:space-between; gap:10px; margin-bottom: 10px;">
                 <button onclick="document.getElementById('local-log').innerHTML='';" class="secondary" style="padding: 4px 8px; font-size:11px;">Flush View Logs</button>
                 <button class="danger" onclick="executeFactoryResetPurge()" style="padding: 4px 8px; font-size:11px;">Purge Storage</button>
             </div>
