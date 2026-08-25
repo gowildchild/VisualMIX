@@ -1,3 +1,8 @@
+////////////////////
+// VisualMIX Crypto Java v0.0.3     
+// (c)2007-2026 by Gunther Voet
+   ////////////////////////////// 
+
 function interpretAsSignedDecimal(valueInput, maxBits = 32) {
     let val = BigInt(parseAnyToDecimal(valueInput));
     let bits = BigInt(maxBits);
