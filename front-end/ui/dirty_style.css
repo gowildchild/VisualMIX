@@ -1,7 +1,8 @@
-/**
- * 🔬 Universal Zero-Trust Dashboard Theme Matrix
- * High-density responsive grid environment supporting desktops and mobile screens.
- */
+/** 
+ * * Universal Zero Trust Dashboard
+ *** Quick-n-Dirty Telemetry            VisualMIX/front_end/core/universal_style.css
+ ** (c)2006-2012 Gunther Voet
+**/
 
 :root {
     --bg-main: #0f141c;
@@ -48,7 +49,6 @@
     flex-direction: column;
     gap: 8px;
 }
-
 
 .panel {
     transition: box-shadow 0.3s ease, border-color 0.3s ease;
@@ -155,40 +155,6 @@ button.danger {
 button.danger:hover {
     background: #da3633;
 }
-
-.led-container {
-    display: flex;
-    align-items: center;
-    font-size: 11px;
-    font-weight: bold;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.led-indicator {
-    width: 10px;
-    height: 12px;
-    border-radius: 50%;
-    margin-right: 6px;
-    box-shadow: 0 0 6px rgba(0,0,0,0.5);
-}
-
-.led-green {
-    background: var(--green);
-    box-shadow: 0 0 8px var(--green);
-}
-
-.led-orange {
-    background: var(--orange);
-    box-shadow: 0 0 8px var(--orange);
-}
-
-.led-red {
-    background: var(--red);
-    box-shadow: 0 0 8px var(--red);
-}
-
-.led-blue { background: var(--blue); box-shadow: 0 0 10px var(--blue); }
 
 .log-box {
     height: 100px;
