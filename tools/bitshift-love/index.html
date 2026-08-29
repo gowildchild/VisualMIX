@@ -537,7 +537,6 @@
         }
     }
 
-    // Dynamic Select Router: Swaps directory maps on click while preserving custom fork user handles
     function handleStructFolderSelectionChange() {
         const selector = document.getElementById("structProfileSelect");
         const urlInput = document.getElementById("configUrlInput");
@@ -546,7 +545,6 @@
         const selectedFileName = selector.value;
         if (selectedFileName === "custom") return;
 
-        // Isolate current active account and repository strings out of the address box dynamically to keep forks intact
         let currentUrlValue = urlInput.value.trim();
         let accountHandle = "gowildchild";
         let repoHandle = "VisualMIX";
@@ -560,16 +558,15 @@
             }
         } catch(e) {}
 
-        // Reassemble fresh matching location string pathways safely
         if (selectedFileName === "basic.json") {
-            urlInput.value = `https://raw.githubusercontent.com/{accountHandle}/${repoHandle}/refs/heads/main/tools/struct/basic.json`;
-        } else {
-            // Support jumping repository references natively into your custom fields
-            urlInput.value = `https://raw.githubusercontent.com/{accountHandle}/${selectedFileName === 'existenz.json' ? 'Existenz' : repoHandle}/refs/heads/main/tools/struct/${selectedFileName}`;
+            urlInput.value = `https://raw.githubusercontent.com/${accountHandle}/VisualMIX/refs/heads/main/tools/struct/basic.json`;
+        } else if (selectedFileName === "existenz.json") {
+            urlInput.value = `https://raw.githubusercontent.com/${accountHandle}/Existenz/refs/heads/main/existenzStruct/existenz.json`;
         }
 
         triggerRemoteUrlFetch();
     }
+
 
     function setupTheme() {
         const toggleBtn = document.getElementById("themeToggleBtn");
