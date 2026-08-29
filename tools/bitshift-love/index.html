@@ -17,22 +17,41 @@
     <style>
         :root {
             --bit-box-size: 38px;
+            --border-glow: #00ffaa;
+            --cyan-text: #00f0ff;
+            --magenta-chk: #ff00aa;
         }
         body {
             font-family: system-ui, -apple-system, sans-serif;
             transition: background-color 0.3s, color 0.3s;
         }
+        
+        /* Byte Block Row Containers */
+        .byte-container {
+            border: 1px solid var(--bs-border-color);
+            background-color: var(--bs-body-bg);
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+        }
+        .byte-title {
+            color: var(--cyan-text);
+            font-size: 0.85rem;
+            font-family: monospace;
+            font-weight: bold;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* Enforce clean 8-bit layout grids */
         .bit-matrix-row {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(var(--bit-box-size), 1fr));
-            gap: 4px;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 6px;
             max-width: 100%;
         }
-        @media (min-width: 1400px) {
-            .bit-matrix-row {
-                grid-template-columns: repeat(32, 1fr);
-            }
-        }
+        
         .bit-cell {
             height: 52px;
             display: flex;
@@ -50,26 +69,25 @@
         .bit-cell:hover {
             background-color: var(--bs-secondary-bg);
         }
-        .bit-cell.active-bit {
-            background-color: var(--bs-primary);
-            color: #fff;
-            border-color: var(--bs-primary-border-subtle);
-        }
-        .bit-cell.checkbit-node {
-            border: 2px dashed var(--bs-warning);
-        }
-        .bit-cell.checkbit-node.active-bit {
-            background-color: var(--bs-warning);
-            color: #000;
-            border-color: var(--bs-warning);
-        }
+
+        /* Color States linked to universal metadata type assignments */
+        .bit-cell.type-bit { border-color: var(--border-glow); }
+        .bit-cell.type-chk { border-color: var(--magenta-chk); border-style: dashed; }
+        .bit-cell.type-preset { border-color: #555555; }
+        .bit-cell.type-default { border-color: #ffffff; }
+
         .bit-val {
             font-weight: bold;
-            font-size: 0.95rem;
+            font-size: 0.8rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
         }
         .bit-idx {
-            opacity: 0.65;
+            opacity: 0.5;
             font-size: 0.65rem;
+            font-family: monospace;
         }
         .input-group-text-fixed {
             width: 55px;
@@ -90,6 +108,13 @@
         }
         .copy-btn {
             cursor: pointer;
+        }
+        @media (min-width: 1400px) {
+            .bit-matrix-row {
+                display: grid !important;
+                grid-template-columns: repeat(8, 1fr) !important; /* Force grids to stack as 8-bit columns */
+                gap: 6px;
+            }
         }
     </style>
 </head>
@@ -701,6 +726,7 @@
     }
 
     // JSON Schema Config Code Exporter / Importer Parser Engine
+    // JSON Schema Config Code Exporter / Importer Parser Engine
     function exportStateToJson() {
         let metaObj = {
             "UNIVERSAL_META_BITS": {
@@ -749,24 +775,42 @@
             }
 
             let computedVal = 0n;
-            const keys = Object.keys(parsed.UNIVERSAL_META_BITS);
+            const entries = Object.entries(parsed.UNIVERSAL_META_BITS);
 
-            keys.forEach(key => {
-                if (key.startsWith("BIT-") && key !== "BIT-CLEAR" && key !== "BIT-ON") {
-                    const node = parsed.UNIVERSAL_META_BITS[key];
-                    if (node && node.value) {
-                        computedVal |= BigInt(node.value);
+            // Step A: Parse every key dynamically to prevent losing custom named slots
+            entries.forEach(([key, node]) => {
+                // Filter out clear macro controls so they don't corrupt the accumulator state
+                if (key === "BIT-CLEAR" || key === "BIT-ON" || key.includes("SHIFT") || key.includes("-OFF") || key.includes("-ON") || key.includes("-TOGGLE")) {
+                    return;
+                }
+                
+                if (node && node.value !== undefined) {
+                    const nodeVal = BigInt(node.value);
+                    
+                    // Step B: For individual tracking bits, checkbit nodes, or verifications
+                    if (key.startsWith("BIT-") || key.startsWith("CHECK-") || node.type === "HYBRID" || node.type === "CHK-SUM") {
+                        
+                        // Extract bit values safely into our registry mapping track
+                        if (key.startsWith("BIT-")) {
+                            // Singular independent bits are accumulated directly
+                            computedVal |= nodeVal;
+                        } else {
+                            // Cross-verify and bind custom validation bitmask states cleanly
+                            computedVal |= nodeVal;
+                        }
                     }
                 }
             });
 
-            // Adjust width framework detection based on max imported nodes safely
+            // Step C: Update your existing architecture state cleanly
             setBitValueSafe(computedVal);
             showToastNotification("Schema file imported and bit values recalculated.");
         } catch (err) {
             alert("Malformed JSON configuration structure format. Verify inputs parameters mapping syntax.");
+            console.error(err);
         }
     }
+
 
     // Helper functions
     function copyToClipboard(elementId) {
