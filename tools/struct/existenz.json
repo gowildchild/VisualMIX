@@ -34,7 +34,7 @@
     "BIT-29":             {"val": 536870912,  "expr": "1 << 29",    "type": "BIT",     "group":"BYTE-3",     "comment": "BIT-29 toggle"},
     "BIT-30":             {"val": 1073741824, "expr": "1 << 30",    "type": "BIT",     "group":"BYTE-3",     "comment": "BIT-30 toggle"},
     "BIT-31":             {"val": 2147483648, "expr": "1 << 31",    "type": "CHK-SUM", "group":"BYTE-3",     "comment": "BIT-31 checksum"},
-    "DEFAULT":            {"val": 2047,       "expr": "0x000007FF", "type": "DEFAULT", "group":"PRESET",     "comment": "EXISTENZ NORMAL STATE"},
+    "DEFAULT":            {"val": 16383,      "expr": "0x00003FFF", "type": "DEFAULT", "group":"PRESET",     "comment": "EXISTENZ IDLE STATE"},
     "SHIFT LEFT":         {"val": 4294967295, "expr": "",           "type": "LEFT",    "group":"BITSHIFT",   "comment": "Shift Left"},
     "SHIFT RIGHT":        {"val": 4294967295, "expr": "",           "type": "RIGHT",   "group":"BITSHIFT",   "comment": "Shift Right"},
     "BYTE-0-DEC":         {"val": 255,        "expr": "0x00",       "type": "DEC",     "group":"BYTE-0",     "comment": "Show Byte-0 DEC"},
