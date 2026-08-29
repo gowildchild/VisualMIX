@@ -32,7 +32,7 @@
             background-color: var(--bs-body-bg);
             padding: 12px;
             border-radius: 6px;
-            margin-bottom: 16px;
+            margin-bottom: 90px !important; /* Expanded depth offset boundary accommodating 45-degree angle descriptions */
         }
         .byte-title {
             color: var(--cyan-text);
@@ -68,6 +68,40 @@
         }
         .bit-cell:hover {
             background-color: var(--bs-secondary-bg);
+        }
+
+        /* Hardware-level Slanted Description Matrices Layout Elements */
+        .bit-labels-row {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr) !important;
+            gap: 6px;
+            margin-top: 4px;
+        }
+        .slanted-label-wrapper {
+            position: relative;
+            height: 65px;
+            overflow: visible;
+        }
+        .slanted-label-text {
+            position: absolute;
+            top: 5px;
+            left: 50%;
+            transform: rotate(45deg);
+            transform-origin: top left;
+            white-space: nowrap;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.65rem;
+            font-weight: bold;
+            color: var(--cyan-text);
+            width: 120px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            padding-left: 5px;
+            border-left: 1px dashed rgba(0, 240, 255, 0.2);
+        }
+        .slanted-label-text.empty-wire {
+            color: #555555;
+            border-left: 1px dashed rgba(255, 255, 255, 0.05);
         }
 
         /* Color States linked to universal metadata type assignments */
@@ -109,14 +143,16 @@
         .copy-btn {
             cursor: pointer;
         }
+        
         @media (min-width: 1400px) {
-            .bit-matrix-row {
+            .bit-matrix-row, .bit-labels-row {
                 display: grid !important;
                 grid-template-columns: repeat(8, 1fr) !important; /* Force grids to stack as 8-bit columns */
                 gap: 6px;
             }
         }
     </style>
+
 </head>
 <body class="bg-body text-body py-4">
 
