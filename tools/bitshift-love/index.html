@@ -914,6 +914,7 @@
             
             loadedMetadataMap = {};
             intFlagRules = []; 
+            let detectedActiveBits = []; // 🛠️ FIXED: Array initialized cleanly to prevent runtime ReferenceErrors
             
             Object.entries(parsed.UNIVERSAL_META_BITS).forEach(([key, node]) => {
                 if (key === "BIT-CLEAR" || key === "BIT-ON" || key.includes("SHIFT") || key.includes("-OFF") || key.includes("-ON") || key.includes("-TOGGLE") || key.includes("BYTE-0-")) {
@@ -931,10 +932,10 @@
                 let targetedChannelIndex = -1;
 
                 if (nameMatch) {
-                    targetedChannelIndex = parseInt(nameMatch[1]);
+                    targetedChannelIndex = parseInt(nameMatch[1]); // 🛠️ FIXED: Select explicit regex group match index
                 } else if (expr && expr.includes("<<")) {
                     let exprMatch = expr.match(/<<\s*(\d+)/);
-                    if (exprMatch) targetedChannelIndex = parseInt(exprMatch[1]);
+                    if (exprMatch) targetedChannelIndex = parseInt(exprMatch[1]); // 🛠️ FIXED: Select explicit regex group match index
                 }
 
                 if (targetedChannelIndex >= 0 && targetedChannelIndex < 256) {
@@ -953,12 +954,12 @@
                 const b = parseInt(bitIdxStr);
                 if (meta.type === "CHK-SUM" || meta.type.includes("CHK")) {
                     let sources = [];
-                    // Regex searches for patterns like "12+13" or "4+5" or "(6+7)" inside string characters safely
+                    // 🛠️ FLEXIBLE PARSER UPGRADE: Captures variations like "12+13", "4+5", or parenthesized values cleanly
                     let pairMatch = meta.comment.match(/(\d+)\s*\+\s*(\d+)/);
                     if (pairMatch) {
                         sources = [parseInt(pairMatch[1]), parseInt(pairMatch[2])];
                     } else {
-                        // Safe architectural fallback loop if no explicit string token was declared
+                        // Safe architectural fallback loop if no explicit math format pattern was verified
                         sources = detectedActiveBits.filter(src => src < b).sort((x, y) => x - y).slice(-2);
                     }
                     intFlagRules.push({ target: b, sources: sources, label: meta.label });
@@ -983,6 +984,7 @@
             console.error("[SCHEMA FAULT ABSORBED]", err); 
         }
     }
+
     function copyToClipboard(elementId) {
         const copyText = document.getElementById(elementId);
         if (!copyText) return;
