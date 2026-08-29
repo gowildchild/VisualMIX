@@ -17,41 +17,22 @@
     <style>
         :root {
             --bit-box-size: 38px;
-            --border-glow: #00ffaa;
-            --cyan-text: #00f0ff;
-            --magenta-chk: #ff00aa;
         }
         body {
             font-family: system-ui, -apple-system, sans-serif;
             transition: background-color 0.3s, color 0.3s;
         }
-        
-        /* Byte Block Row Containers */
-        .byte-container {
-            border: 1px solid var(--bs-border-color);
-            background-color: var(--bs-body-bg);
-            padding: 12px;
-            border-radius: 6px;
-            margin-bottom: 95px !important; /* Safely pushes the next byte row down to make room for labels */
-        }
-        .byte-title {
-            color: var(--cyan-text);
-            font-size: 0.85rem;
-            font-family: monospace;
-            font-weight: bold;
-            margin-bottom: 8px;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        /* Enforce clean 8-bit layout grids */
         .bit-matrix-row {
             display: grid;
-            grid-template-columns: repeat(8, 1fr);
-            gap: 6px;
+            grid-template-columns: repeat(auto-fill, minmax(var(--bit-box-size), 1fr));
+            gap: 4px;
             max-width: 100%;
         }
-        
+        @media (min-width: 1400px) {
+            .bit-matrix-row {
+                grid-template-columns: repeat(32, 1fr);
+            }
+        }
         .bit-cell {
             height: 52px;
             display: flex;
@@ -65,55 +46,31 @@
             user-select: none;
             transition: all 0.15s ease-in-out;
             font-size: 0.75rem;
-            position: relative; /* CRITICAL: Allows absolute labels to anchor directly beneath this cell */
+            position: relative; /* Restored: Keeps tracker layout stable */
         }
         .bit-cell:hover {
             background-color: var(--bs-secondary-bg);
         }
-
-        /* Self-Contained 45-Degree Label System */
-        .bit-cell-slant-text {
-            position: absolute;
-            top: 54px; /* Sits exactly below the 52px height boundary of the cell */
-            left: 50%;
-            transform: rotate(45deg);
-            transform-origin: top left;
-            white-space: nowrap;
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 0.65rem;
-            font-weight: bold;
-            color: var(--cyan-text);
-            width: 110px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            text-align: left;
-            pointer-events: none; /* Prevents text from blocking mouse clicks on the interface */
-            padding-left: 4px;
-            border-left: 1px dashed rgba(0, 240, 255, 0.2);
+        .bit-cell.active-bit {
+            background-color: var(--bs-primary);
+            color: #fff;
+            border-color: var(--bs-primary-border-subtle);
         }
-        .bit-cell-slant-text.empty-wire {
-            color: #555555;
-            border-left: 1px dashed rgba(255, 255, 255, 0.05);
+        .bit-cell.checkbit-node {
+            border: 2px dashed var(--bs-warning);
         }
-
-        /* Color States linked to universal metadata type assignments */
-        .bit-cell.type-bit { border-color: var(--border-glow); }
-        .bit-cell.type-chk { border-color: var(--magenta-chk); border-style: dashed; }
-        .bit-cell.type-preset { border-color: #555555; }
-        .bit-cell.type-default { border-color: #ffffff; }
-
+        .bit-cell.checkbit-node.active-bit {
+            background-color: var(--bs-warning);
+            color: #000;
+            border-color: var(--bs-warning);
+        }
         .bit-val {
             font-weight: bold;
-            font-size: 0.8rem;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 100%;
+            font-size: 0.95rem;
         }
         .bit-idx {
-            opacity: 0.5;
+            opacity: 0.65;
             font-size: 0.65rem;
-            font-family: monospace;
         }
         .input-group-text-fixed {
             width: 55px;
@@ -135,15 +92,44 @@
         .copy-btn {
             cursor: pointer;
         }
-        
-        @media (min-width: 1400px) {
-            .bit-matrix-row {
-                display: grid !important;
-                grid-template-columns: repeat(8, 1fr) !important; /* Force grids to stack as 8-bit columns */
-                gap: 6px;
-            }
+
+        /* ZERO-FOOTPRINT COUPLING LAYER: Adds the 45-degree descriptor overlay cleanly */
+        .bit-cell-tracker-slant {
+            position: absolute;
+            top: 56px;
+            left: 50%;
+            transform: rotate(45deg);
+            transform-origin: top left;
+            white-space: nowrap;
+            font-family: 'Courier New', monospace;
+            font-size: 0.65rem;
+            font-weight: bold;
+            color: #00f0ff; /* Neon cyan guide accent */
+            width: 110px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            text-align: left;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.15s ease-in-out, transform 0.15s ease-in-out;
+            z-index: 1050;
+            padding-left: 4px;
+            border-left: 1px dashed rgba(0, 240, 255, 0.4);
+        }
+
+        /* Reveal the slanted description smoothly only when hovering the tracker button */
+        .bit-cell:hover .bit-cell-tracker-slant {
+            opacity: 1;
+            transform: rotate(45deg) translateY(0);
+        }
+
+        /* Adjust room underneath the main block row for the hover slants */
+        .bit-matrix-row:hover {
+            margin-bottom: 75px;
+            transition: margin 0.2s ease-in-out;
         }
     </style>
+
 
 
 </head>
