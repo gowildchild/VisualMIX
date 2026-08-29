@@ -558,10 +558,18 @@
             if (!rootBlock) return;
 
             let computedVal = 0n, maxBit = 31;
+            let defaultInitializationOverride = null; // 🚀 NEW: Captures your profile's custom startup state
+            
             loadedMetadataMap = {};
             intFlagRules = []; // Reset old rules to rebuild cleanly from file parameters
             
             Object.entries(rootBlock).forEach(([key, node]) => {
+                // Intercept the global startup token explicitly
+                if (key === "DEFAULT" && node && node.val !== undefined) {
+                    defaultInitializationOverride = BigInt(node.val);
+                    return;
+                }
+
                 if (key === "BIT-CLEAR" || key === "BIT-ON" || key.includes("SHIFT") || key.includes("-OFF") || key.includes("-ON") || key.includes("-TOGGLE") || key.includes("BYTE-0-")) {
                     return;
                 }
@@ -570,7 +578,7 @@
                 let bitmaskValue = 0;
                 
                 if (node && node.val !== undefined) {
-                    numericVal = BigInt(node.val); 
+                    numericVal = BigInt(node.val); // Read your clean shortened "val" field natively
                     type = node.type || "BIT"; 
                     group = node.group || "NONE"; 
                     comment = node.comment || ""; 
@@ -596,7 +604,7 @@
                 if (targetedChannelIndex >= 0 && targetedChannelIndex < 256) {
                     if (targetedChannelIndex > maxBit) maxBit = targetedChannelIndex;
                     
-                    // Accumulate base inputs cleanly if it's not a canary overlay checker
+                    // Only accumulate base active inputs if no global override pattern was registered
                     if (type !== "CHK-SUM" && !type.includes("CHK") && type !== "CANARY") {
                         computedVal |= (1n << BigInt(targetedChannelIndex));
                     }
@@ -620,7 +628,6 @@
                 }
             });
 
-            // Auto-calculate appropriate architecture size boundaries cleanly after loop completes
             let targetWidth = 32;
             if (maxBit >= 128) {
                 targetWidth = 256;
@@ -638,7 +645,14 @@
             
             renderBitMatrixCanvas();
             renderRulesInterfaceList(); 
-            setBitValueSafe(computedVal);
+            
+            // 🚀 STRATEGIC INITIALIZATION OVERRIDE: Prioritize your custom "DEFAULT" value map layout if found!
+            if (defaultInitializationOverride !== null) {
+                setBitValueSafe(defaultInitializationOverride);
+            } else {
+                setBitValueSafe(computedVal);
+            }
+            
             showToastNotification("Schema successfully loaded.");
         } catch (err) { 
             console.error("[SCHEMA FAULT ABSORBED]", err); 
