@@ -904,7 +904,6 @@
         parseAndApplyJsonPayload(rawStr);
     }
 
-    // Dynamic Comment-Based Checkbit Association Engine
     function parseAndApplyJsonPayload(jsonTextString) {
         try {
             if (!jsonTextString || !jsonTextString.includes("UNIVERSAL_META_BITS")) return;
@@ -914,9 +913,10 @@
             
             loadedMetadataMap = {};
             intFlagRules = []; 
-            let detectedActiveBits = []; // 🛠️ FIXED: Array initialized cleanly to prevent runtime ReferenceErrors
+            let detectedActiveBits = [];
             
             Object.entries(parsed.UNIVERSAL_META_BITS).forEach(([key, node]) => {
+                // Ignore layout filters and operations from mapping onto channels
                 if (key === "BIT-CLEAR" || key === "BIT-ON" || key.includes("SHIFT") || key.includes("-OFF") || key.includes("-ON") || key.includes("-TOGGLE") || key.includes("BYTE-0-")) {
                     return;
                 }
@@ -928,14 +928,24 @@
                     val = BigInt(node || 0); type = val < 65536n ? "PILLAR" : "SHIELD";
                 }
 
+                // SMART POSITION EXTRACTOR: Try parsing explicit names first
                 let nameMatch = key.match(/(?:BIT|CHECK)-(\d+)/i);
                 let targetedChannelIndex = -1;
 
                 if (nameMatch) {
-                    targetedChannelIndex = parseInt(nameMatch[1]); // 🛠️ FIXED: Select explicit regex group match index
+                    targetedChannelIndex = parseInt(nameMatch[1]);
                 } else if (expr && expr.includes("<<")) {
                     let exprMatch = expr.match(/<<\s*(\d+)/);
-                    if (exprMatch) targetedChannelIndex = parseInt(exprMatch[1]); // 🛠️ FIXED: Select explicit regex group match index
+                    if (exprMatch) targetedChannelIndex = parseInt(exprMatch[1]);
+                } else if (val > 0n) {
+                    // UNIVERSAL FALLBACK: Math trace the exponential Bit Shift offset position directly from the value
+                    let tempVal = val;
+                    let bitPositionTracker = 0;
+                    while (tempVal > 1n) {
+                        tempVal >>= 1n;
+                        bitPositionTracker++;
+                    }
+                    targetedChannelIndex = bitPositionTracker;
                 }
 
                 if (targetedChannelIndex >= 0 && targetedChannelIndex < 256) {
@@ -945,7 +955,17 @@
                         detectedActiveBits.push(targetedChannelIndex);
                         computedVal |= (1n << BigInt(targetedChannelIndex));
                     }
-                    loadedMetadataMap[targetedChannelIndex] = { key: key, label: key, type: type, group: group, comment: comment };
+                    
+                    // 🚀 UPDATED DYNAMIC LABEL: Displays the pure Custom Root Name alongside its custom description text below
+                    let structuralSlantLabel = comment ? `${key}: ${comment}` : key;
+                    
+                    loadedMetadataMap[targetedChannelIndex] = { 
+                        key: key, 
+                        label: structuralSlantLabel, 
+                        type: type, 
+                        group: group, 
+                        comment: comment 
+                    };
                 }
             });
 
@@ -954,12 +974,10 @@
                 const b = parseInt(bitIdxStr);
                 if (meta.type === "CHK-SUM" || meta.type.includes("CHK")) {
                     let sources = [];
-                    // 🛠️ FLEXIBLE PARSER UPGRADE: Captures variations like "12+13", "4+5", or parenthesized values cleanly
                     let pairMatch = meta.comment.match(/(\d+)\s*\+\s*(\d+)/);
                     if (pairMatch) {
                         sources = [parseInt(pairMatch[1]), parseInt(pairMatch[2])];
                     } else {
-                        // Safe architectural fallback loop if no explicit math format pattern was verified
                         sources = detectedActiveBits.filter(src => src < b).sort((x, y) => x - y).slice(-2);
                     }
                     intFlagRules.push({ target: b, sources: sources, label: meta.label });
@@ -984,6 +1002,7 @@
             console.error("[SCHEMA FAULT ABSORBED]", err); 
         }
     }
+
 
     function copyToClipboard(elementId) {
         const copyText = document.getElementById(elementId);
