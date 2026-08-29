@@ -897,7 +897,13 @@
             if (cell && display) {
                 if (slantText) {
                     if (hasLabel) {
-                        slantText.innerText = customMeta.label;
+                        const slantComment = customMeta.comment ? customMeta.comment : 'empty lane';
+                        slantText.innerHTML = `
+                            <div class="text-nowrap text-truncate" style="max-width: 120px;">${customMeta.key}</div>
+                            <div class="bit-slant-comment text-nowrap text-truncate" style="max-width: 120px;" title="${slantComment}">
+                                ${slantComment}
+                            </div>
+                        `;
                         slantText.classList.remove("empty-wire");
                         slantText.classList.add("populated-label");
                     } else {
