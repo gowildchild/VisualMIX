@@ -547,6 +547,105 @@
         }
     }
 
+    function parseAndApplyJsonPayload(jsonTextString) {
+        try {
+            if (!jsonTextString || (!jsonTextString.includes("UNIVERSAL_META_BITS") && !jsonTextString.includes("existentialCore"))) return;
+
+            const parsed = JSON.parse(jsonTextString);
+            
+            // Support both VisualMIX standard root blocks and your custom existentialCore maps
+            const rootBlock = parsed.UNIVERSAL_META_BITS || parsed.existentialCore;
+            if (!rootBlock) return;
+
+            let computedVal = 0n, maxBit = 31;
+            loadedMetadataMap = {};
+            intFlagRules = []; // Reset old rules to rebuild cleanly from file parameters
+            
+            Object.entries(rootBlock).forEach(([key, node]) => {
+                if (key === "BIT-CLEAR" || key === "BIT-ON" || key.includes("SHIFT") || key.includes("-OFF") || key.includes("-ON") || key.includes("-TOGGLE") || key.includes("BYTE-0-")) {
+                    return;
+                }
+                
+                let numericVal = 0n, type = "BIT", group = "NONE", comment = "", expr = "";
+                let bitmaskValue = 0;
+                
+                if (node && node.val !== undefined) {
+                    numericVal = BigInt(node.val); 
+                    type = node.type || "BIT"; 
+                    group = node.group || "NONE"; 
+                    comment = node.comment || ""; 
+                    expr = node.expr || "";
+                    bitmaskValue = node.mask !== undefined ? Number(node.mask) : 0; 
+                } else {
+                    numericVal = BigInt(node || 0); 
+                    type = numericVal < 65536n ? "PILLAR" : "SHIELD";
+                }
+
+                // Math-trace the exponential Bit Shift offset position directly from the numerical value
+                let targetedChannelIndex = -1;
+                if (numericVal > 0n) {
+                    let tempVal = numericVal;
+                    let bitPositionTracker = 0;
+                    while (tempVal > 1n) {
+                        tempVal >>= 1n;
+                        bitPositionTracker++;
+                    }
+                    targetedChannelIndex = bitPositionTracker;
+                }
+
+                if (targetedChannelIndex >= 0 && targetedChannelIndex < 256) {
+                    if (targetedChannelIndex > maxBit) maxBit = targetedChannelIndex;
+                    
+                    // Accumulate base inputs cleanly if it's not a canary overlay checker
+                    if (type !== "CHK-SUM" && !type.includes("CHK") && type !== "CANARY") {
+                        computedVal |= (1n << BigInt(targetedChannelIndex));
+                    }
+                    
+                    // Feeds root names and comments straight to your stacked 45-degree corridor views
+                    loadedMetadataMap[targetedChannelIndex] = { 
+                        key: key, 
+                        label: key, 
+                        type: type, 
+                        group: group, 
+                        comment: comment 
+                    };
+
+                    if (type === "CHK-SUM" || type.includes("CHK") || type === "CANARY") {
+                        intFlagRules.push({
+                            target: targetedChannelIndex,
+                            mask: BigInt(bitmaskValue), 
+                            label: key
+                        });
+                    }
+                }
+            });
+
+            // Auto-calculate appropriate architecture size boundaries cleanly after loop completes
+            let targetWidth = 32;
+            if (maxBit >= 128) {
+                targetWidth = 256;
+            } else if (maxBit >= 64) {
+                targetWidth = 128;
+            } else if (maxBit >= 48) {
+                targetWidth = 64;
+            } else if (maxBit >= 32) {
+                targetWidth = 48;
+            }
+            
+            currentBitWidth = targetWidth;
+            const archEl = document.getElementById("archSelect");
+            if (archEl) archEl.value = currentBitWidth.toString();
+            
+            renderBitMatrixCanvas();
+            renderRulesInterfaceList(); 
+            setBitValueSafe(computedVal);
+            showToastNotification("Schema successfully loaded.");
+        } catch (err) { 
+            console.error("[SCHEMA FAULT ABSORBED]", err); 
+        }
+    }
+ 
+    
     function handleStructFolderSelectionChange() {
         const selector = document.getElementById("structProfileSelect");
         const urlInput = document.getElementById("configUrlInput");
@@ -569,9 +668,11 @@
         } catch(e) {}
 
         if (selectedFileName === "basic.json") {
-            urlInput.value = `https://raw.githubusercontent.com/${accountHandle}/VisualMIX/refs/heads/main/tools/struct/basic.json`;
+            urlInput.value = `https://raw.githubusercontent.com/${accountHandle}/${repoHandle}/refs/heads/main/tools/struct/basic.json`;
         } else if (selectedFileName === "existenz.json") {
-            urlInput.value = `https://raw.githubusercontent.com/${accountHandle}/Existenz/refs/heads/main/existenzStruct/existenz.json`;
+            urlInput.value = `https://raw.githubusercontent.com/${accountHandle}/${repoHandle}/refs/heads/main/tools/struct/existenz.json`;
+        } else if (selectedFileName === "existentialCore.json") {
+            urlInput.value = `https://raw.githubusercontent.com/${accountHandle}/Existenz/refs/heads/main/dist/existentialCore.json`;
         }
 
         triggerRemoteUrlFetch();
