@@ -906,40 +906,40 @@
 
     function parseAndApplyJsonPayload(jsonTextString) {
         try {
-            if (!jsonTextString || !jsonTextString.includes("UNIVERSAL_META_BITS")) return;
+            if (!jsonTextString || !jsonTextString.includes("UNIVERSAL_META_BITS") && !jsonTextString.includes("existentialCore")) return;
 
             const parsed = JSON.parse(jsonTextString);
+            const rootBlock = parsed.UNIVERSAL_META_BITS || parsed.existentialCore;
+            if (!rootBlock) return;
+
             let computedVal = 0n, maxBit = 31;
-            
             loadedMetadataMap = {};
-            intFlagRules = []; 
-            let detectedActiveBits = [];
+            intFlagRules = []; // Reset old rules to rebuild cleanly from file parameters
             
-            Object.entries(parsed.UNIVERSAL_META_BITS).forEach(([key, node]) => {
-                // Ignore layout filters and operations from mapping onto channels
+            Object.entries(rootBlock).forEach(([key, node]) => {
                 if (key === "BIT-CLEAR" || key === "BIT-ON" || key.includes("SHIFT") || key.includes("-OFF") || key.includes("-ON") || key.includes("-TOGGLE") || key.includes("BYTE-0-")) {
                     return;
                 }
                 
-                let val = 0n, type = "BIT", group = "NONE", comment = "", expr = "";
-                if (node && node.value !== undefined) {
-                    val = BigInt(node.value); type = node.type || "BIT"; group = node.group || "NONE"; comment = node.comment || ""; expr = node.expr || "";
+                let numericVal = 0n, type = "BIT", group = "NONE", comment = "", expr = "";
+                let bitmaskValue = 0;
+                
+                if (node && node.val !== undefined) {
+                    numericVal = BigInt(node.val); // 🚀 UPDATED: Read your clean shortened "val" field natively
+                    type = node.type || "BIT"; 
+                    group = node.group || "NONE"; 
+                    comment = node.comment || ""; 
+                    expr = node.expr || "";
+                    bitmaskValue = node.mask !== undefined ? Number(node.mask) : 0; 
                 } else {
-                    val = BigInt(node || 0); type = val < 65536n ? "PILLAR" : "SHIELD";
+                    numericVal = BigInt(node || 0); 
+                    type = numericVal < 65536n ? "PILLAR" : "SHIELD";
                 }
 
-                // SMART POSITION EXTRACTOR: Try parsing explicit names first
-                let nameMatch = key.match(/(?:BIT|CHECK)-(\d+)/i);
+                // Math-trace the exponential Bit Shift offset position directly from the numerical value
                 let targetedChannelIndex = -1;
-
-                if (nameMatch) {
-                    targetedChannelIndex = parseInt(nameMatch[1]);
-                } else if (expr && expr.includes("<<")) {
-                    let exprMatch = expr.match(/<<\s*(\d+)/);
-                    if (exprMatch) targetedChannelIndex = parseInt(exprMatch[1]);
-                } else if (val > 0n) {
-                    // UNIVERSAL FALLBACK: Math trace the exponential Bit Shift offset position directly from the value
-                    let tempVal = val;
+                if (numericVal > 0n) {
+                    let tempVal = numericVal;
                     let bitPositionTracker = 0;
                     while (tempVal > 1n) {
                         tempVal >>= 1n;
@@ -951,12 +951,10 @@
                 if (targetedChannelIndex >= 0 && targetedChannelIndex < 256) {
                     if (targetedChannelIndex > maxBit) maxBit = targetedChannelIndex;
                     
-                    if (type !== "CHK-SUM" && !type.includes("CHK")) {
-                        detectedActiveBits.push(targetedChannelIndex);
+                    if (type !== "CHK-SUM" && !type.includes("CHK") && type !== "CANARY") {
                         computedVal |= (1n << BigInt(targetedChannelIndex));
                     }
                     
-                    // 🚀 UPDATED DYNAMIC LABEL: Displays the pure Custom Root Name alongside its custom description text below
                     let structuralSlantLabel = comment ? `${key}: ${comment}` : key;
                     
                     loadedMetadataMap[targetedChannelIndex] = { 
@@ -966,21 +964,14 @@
                         group: group, 
                         comment: comment 
                     };
-                }
-            });
 
-            // 🔍 AUTOMATED SYSTEM REGEX PARSER: Extracts rule structures straight out of comment metadata strings on the fly!
-            Object.entries(loadedMetadataMap).forEach(([bitIdxStr, meta]) => {
-                const b = parseInt(bitIdxStr);
-                if (meta.type === "CHK-SUM" || meta.type.includes("CHK")) {
-                    let sources = [];
-                    let pairMatch = meta.comment.match(/(\d+)\s*\+\s*(\d+)/);
-                    if (pairMatch) {
-                        sources = [parseInt(pairMatch[1]), parseInt(pairMatch[2])];
-                    } else {
-                        sources = detectedActiveBits.filter(src => src < b).sort((x, y) => x - y).slice(-2);
+                    if (type === "CHK-SUM" || type.includes("CHK") || type === "CANARY") {
+                        intFlagRules.push({
+                            target: targetedChannelIndex,
+                            mask: BigInt(bitmaskValue), 
+                            label: key
+                        });
                     }
-                    intFlagRules.push({ target: b, sources: sources, label: meta.label });
                 }
             });
 
@@ -1003,6 +994,51 @@
         }
     }
 
+    // ⚡ SINGLE CLOCK-CYCLE CASCADING EVALUATION SYSTEM
+    function evaluateIntFlagAutomations() {
+        const ruleEnabled = document.getElementById("intFlagRuleCheck").checked;
+        if (!ruleEnabled || intFlagRules.length === 0) return;
+
+        let sequentialRules = [...intFlagRules].sort((a, b) => a.target - b.target);
+
+        sequentialRules.forEach(rule => {
+            if (rule.target >= currentBitWidth) return;
+            
+            // DIRECT COMPARISON: Processes compound states in 1 loop step with no text evaluation overhead
+            const isMaskVerified = (bitValue & rule.mask) === rule.mask;
+
+            const targetMask = 1n << BigInt(rule.target);
+            if (isMaskVerified && rule.mask > 0n) {
+                bitValue |= targetMask; 
+            } else {
+                bitValue &= ~targetMask; 
+            }
+        });
+    }
+
+    function renderRulesInterfaceList() {
+        const wrapper = document.getElementById("rulesConfigWrapper");
+        if (!wrapper) return;
+        wrapper.innerHTML = "";
+        
+        if (intFlagRules.length === 0) {
+            wrapper.innerHTML = `<div class="text-muted xs p-1 text-center" style="font-size:0.7rem;">No active checkbit dependencies loaded.</div>`;
+            return;
+        }
+
+        intFlagRules.forEach((rule) => {
+            const div = document.createElement("div");
+            div.className = "p-1 mb-1 border rounded bg-body-tertiary d-flex justify-content-between align-items-center font-monospace";
+            div.style.fontSize = "0.72rem";
+            div.innerHTML = `
+                <div>
+                    <span class="text-warning fw-bold">Bit ${rule.target}</span> &larr; Mask: <span class="text-info">0x${rule.mask.toString(16).toUpperCase()}</span>
+                </div>
+                <span class="badge bg-secondary font-monospace" style="font-size:0.6rem;">${rule.label}</span>
+            `;
+            wrapper.appendChild(div);
+        });
+    }
 
     function copyToClipboard(elementId) {
         const copyText = document.getElementById(elementId);
