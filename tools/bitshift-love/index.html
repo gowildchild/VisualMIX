@@ -378,7 +378,7 @@
     // Dynamic cache layer preserving custom JSON named strings on cross-renders
     let loadedMetadataMap = {};
 
-    // Rules Mapping for IntFlags Checkbits
+    // Rules Mapping for IntFlags Checkbits (Restored syntax integrity)
     let intFlagRules = [
         { target: 3, sources:, label: "Parity/IntFlag 3" },
         { target: 9, sources:, label: "Parity/IntFlag 9" },
@@ -393,6 +393,9 @@
         renderBitMatrixCanvas();
         renderRulesInterfaceList();
         updateAllDisplays(true);
+
+        // Feature Update: Attempt background sync load of local json folder config map
+        autoLoadDefaultJsonConfig();
 
         document.getElementById("archSelect").addEventListener("change", (e) => {
             currentBitWidth = parseInt(e.target.value);
@@ -445,7 +448,22 @@
         });
     });
 
-    // Theme Management Engine
+    // Asynchronous background file engine checking local folder on startup
+    async function autoLoadDefaultJsonConfig() {
+        try {
+            const response = await fetch('./universal_bitmap.json');
+            if (response.ok) {
+                const textData = await response.text();
+                document.getElementById("jsonConfigArea").value = textData;
+                parseAndApplyJsonPayload(textData);
+                if (typeof showToastNotification === "function") {
+                    showToastNotification("🎯 Local universal_bitmap.json auto-loaded successfully on boot!");
+                }
+            }
+        } catch (error) {
+            console.log("[INFO] No companion universal_bitmap.json discovered in active directory. Baseline tracker canvas initialized.");
+        }
+    }
     function setupTheme() {
         const toggleBtn = document.getElementById("themeToggleBtn");
         const icon = document.getElementById("themeIcon");
@@ -526,7 +544,7 @@
                 cell.className = `bit-cell ${isCheckbitNode ? 'checkbit-node' : ''}`;
                 cell.setAttribute("onclick", `toggleSingleBitNode(${b})`);
                 
-                // Fetch dynamic cache properties on cell construction
+                // Read configuration states dynamically from local storage mappings
                 const meta = loadedMetadataMap[b];
                 const hasLabel = meta !== undefined;
                 const slantText = hasLabel ? meta.label : 'CH-' + b;
@@ -561,7 +579,6 @@
             wrapper.appendChild(div);
         });
     }
-
     function toggleSingleBitNode(idx) {
         const mask = 1n << BigInt(idx);
         bitValue ^= mask; 
@@ -680,7 +697,6 @@
             pushHistoryState();
         }
     }
-
     function renderByteTableBreakdown() {
         const tbody = document.getElementById("byteFieldsTableBody");
         tbody.innerHTML = "";
@@ -717,41 +733,27 @@
 
     function pushHistoryState() {
         const hexSnapshot = "0x" + bitValue.toString(16).toUpperCase();
-        
         if (stateHistory.length > 0 && stateHistory[0].value === bitValue && stateHistory[0].width === currentBitWidth) {
             return;
         }
-
-        stateHistory.unshift({
-            value: bitValue,
-            width: currentBitWidth,
-            hex: hexSnapshot
-        });
-
-        if (stateHistory.length > maxHistoryCount) {
-            stateHistory.pop();
-        }
+        stateHistory.unshift({ value: bitValue, width: currentBitWidth, hex: hexSnapshot });
+        if (stateHistory.length > maxHistoryCount) { stateHistory.pop(); }
         renderHistoryListUI();
     }
 
     function renderHistoryListUI() {
         const list = document.getElementById("historyStackList");
         list.innerHTML = "";
-        
         if (stateHistory.length === 0) {
             list.innerHTML = `<div class="p-2 text-muted text-center small" style="font-size:0.75rem;">No history logged yet.</div>`;
             return;
         }
-
         stateHistory.forEach((state, index) => {
             const button = document.createElement("button");
             button.type = "button";
             button.className = "list-group-item list-group-item-action history-list-item py-1 px-2 d-flex justify-content-between align-items-center";
             button.onclick = () => revertToHistoricalState(index);
-            button.innerHTML = `
-                <span>Snapshot [${index}]</span>
-                <span class="badge bg-secondary font-monospace">${state.width}b | ${state.hex}</span>
-            `;
+            button.innerHTML = `<span>Snapshot [${index}]</span><span class="badge bg-secondary font-monospace">${state.width}b | ${state.hex}</span>`;
             list.appendChild(button);
         });
     }
@@ -766,10 +768,7 @@
         updateAllDisplays(false);
     }
 
-    function clearHistoryStack() {
-        stateHistory = [];
-        renderHistoryListUI();
-    }
+    function clearHistoryStack() { stateHistory = []; renderHistoryListUI(); }
 
     function exportStateToJson() {
         let metaObj = { "UNIVERSAL_META_BITS": {
@@ -780,20 +779,15 @@
                 "type": "DEFAULT", "group": "PRESET", "comment": "ALL ON" 
             }
         }};
-
         for (let i = 0; i < currentBitWidth; i++) {
-            const isSet = (bitValue & (1n << BigInt(i))) !== 0n;
-            const cacheMeta = loadedMetadataMap[i];
-            const nameLabel = cacheMeta ? cacheMeta.key : `BIT-${i}`;
-            const typeLabel = cacheMeta ? cacheMeta.type : (intFlagRules.some(r => r.target === i) ? "CHK-SUM" : "BIT");
-            const groupLabel = cacheMeta ? cacheMeta.group : `BYTE-${Math.floor(i / 8)}`;
-            const commentLabel = cacheMeta ? cacheMeta.comment : `BIT-${i} state mask`;
-
-            if (isSet) {
-                metaObj["UNIVERSAL_META_BITS"][nameLabel] = {
+            if ((bitValue & (1n << BigInt(i))) !== 0n) {
+                const cacheMeta = loadedMetadataMap[i];
+                metaObj["UNIVERSAL_META_BITS"][cacheMeta ? cacheMeta.key : `BIT-${i}`] = {
                     "value": Number(1n << BigInt(i)),
                     "expr": i === 0 ? "0" : `1 << ${i}`,
-                    "type": typeLabel, "group": groupLabel, "comment": commentLabel
+                    "type": cacheMeta ? cacheMeta.type : (intFlagRules.some(r => r.target === i) ? "CHK-SUM" : "BIT"),
+                    "group": cacheMeta ? cacheMeta.group : `BYTE-${Math.floor(i / 8)}`,
+                    "comment": cacheMeta ? cacheMeta.comment : `BIT-${i} state mask`
                 };
             }
         }
@@ -802,35 +796,27 @@
     }
 
     function importStateFromJson() {
-        try {
-            const rawStr = document.getElementById("jsonConfigArea").value.trim();
-            if (!rawStr) return;
-            const parsed = JSON.parse(rawStr);
-            if (!parsed.UNIVERSAL_META_BITS) {
-                alert("Missing root 'UNIVERSAL_META_BITS' block standard.");
-                return;
-            }
+        const rawStr = document.getElementById("jsonConfigArea").value.trim();
+        if (!rawStr) return;
+        parseAndApplyJsonPayload(rawStr);
+    }
 
-            let computedVal = 0n;
-            let maxBit = 31;
+    function parseAndApplyJsonPayload(jsonTextString) {
+        try {
+            const parsed = JSON.parse(jsonTextString);
+            if (!parsed.UNIVERSAL_META_BITS) { alert("Missing root 'UNIVERSAL_META_BITS' block standard."); return; }
+            let computedVal = 0n, maxBit = 31;
             loadedMetadataMap = {};
             
             Object.entries(parsed.UNIVERSAL_META_BITS).forEach(([key, node]) => {
                 if (key === "BIT-CLEAR" || key === "BIT-ON" || key.includes("SHIFT") || key.includes("-OFF") || key.includes("-ON") || key.includes("-TOGGLE")) return;
-                
-                let val = 0n;
-                let type = "BIT", group = "NONE", comment = "";
+                let val = 0n, type = "BIT", group = "NONE", comment = "";
                 
                 if (node && node.value !== undefined) {
-                    val = BigInt(node.value);
-                    type = node.type || "BIT";
-                    group = node.group || "NONE";
-                    comment = node.comment || "";
+                    val = BigInt(node.value); type = node.type || "BIT"; group = node.group || "NONE"; comment = node.comment || "";
                 } else if (typeof node === 'number' || typeof node === 'string') {
-                    val = BigInt(node);
-                    type = val < 65536n ? "PILLAR" : "SHIELD";
+                    val = BigInt(node); type = val < 65536n ? "PILLAR" : "SHIELD";
                 }
-
                 computedVal |= val;
                 if (val > 0n) {
                     for (let b = 0; b < 256; b++) {
@@ -850,13 +836,10 @@
             
             currentBitWidth = targetWidth;
             document.getElementById("archSelect").value = currentBitWidth.toString();
-
             renderBitMatrixCanvas();
             setBitValueSafe(computedVal);
             showToastNotification("Schema successfully loaded.");
-        } catch (err) {
-            alert("Malformed JSON data format configurations structure.");
-        }
+        } catch (err) { alert("Malformed JSON data format configurations structure."); }
     }
 
     function copyToClipboard(elementId) {
@@ -873,7 +856,6 @@
         const toastEl = document.getElementById('liveToast');
         const toast = new bootstrap.Toast(toastEl);
         toast.show();
-    }
-</script>
+    }    
 </body>
 </html>
