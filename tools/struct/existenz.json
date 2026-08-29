@@ -48,13 +48,13 @@
     "BYTE-2-ON":          {"val": 255,        "expr": "0xFF",       "type": "ON",      "group":"PRESET",     "comment": "BYTE-2 ON  (16-23)"},
     "BYTE-3-OFF":         {"val": 0,          "expr": "0x00",       "type": "OFF",     "group":"PRESET",     "comment": "BYTE-3 OFF (24-31)"},
     "BYTE-3-ON":          {"val": 255,        "expr": "0xFF",       "type": "ON",      "group":"PRESET",     "comment": "BYTE-3 ON  (24-31)"},
-    "CHECK-3":            {"val": 8,          "expr": "1 << 3",     "type": "CHK-SUM", "group":"VERIFY", "mask": 6,     "comment": "BIT-1 and BIT-2 changed"},
-    "CHECK-9":            {"val": 512,        "expr": "1 << 9",     "type": "CHK-SUM", "group":"VERIFY", "mask": 48,    "comment": "BIT-9 (4+5) is not valid"},
-    "CHECK-13":           {"val": 8192,       "expr": "1 << 13",    "type": "CHK-SUM", "group":"VERIFY", "mask": 192,   "comment": "BIT-13 Verification (6+7)"},
-    "CHECK-17":           {"val": 131072,     "expr": "1 << 17",    "type": "CHK-SUM", "group":"VERIFY", "mask": 768,   "comment": "BIT-17 (8+9) Verification"},
-    "CHECK-21":           {"val": 2097152,    "expr": "1 << 21",    "type": "CHK-SUM", "group":"VERIFY", "mask": 3072,  "comment": "BIT-21 (10+11) Verification"},
-    "CHECK-25":           {"val": 33554432,   "expr": "1 << 25",    "type": "CHK-SUM", "group":"VERIFY", "mask": 12288, "comment": "BIT-25 Verification 12+13"},
-    "CHECK-29":           {"val": 536870912,  "expr": "1 << 29",    "type": "CHK-SUM", "group":"VERIFY", "mask": 49152, "comment": "BIT-29 14+15 Verification"},
-    "CANARY_S":           {"val": 89130487,   "expr": "0x055005f7", "type": "CANARY",  "group":"VERIFY", "mask": "0x055005f7", "comment": "Compound multi-byte valid"}
+    "CHECK-3":            {"val": 8,          "expr": "1 << 3",     "type": "CHK-SUM", "group":"VERIFY", "mask": 6,        "comment": "BIT-1 and BIT-2 changed"},
+    "CHECK-9":            {"val": 512,        "expr": "1 << 9",     "type": "CHK-SUM", "group":"VERIFY", "mask": 48,       "comment": "BIT-9 (4+5) is not valid"},
+    "CHECK-13":           {"val": 8192,       "expr": "1 << 13",    "type": "CHK-SUM", "group":"VERIFY", "mask": 192,      "comment": "BIT-13 Verification (6+7)"},
+    "CHECK-17":           {"val": 131072,     "expr": "1 << 17",    "type": "CHK-SUM", "group":"VERIFY", "mask": 768,      "comment": "BIT-17 (8+9) Verification"},
+    "CHECK-21":           {"val": 2097152,    "expr": "1 << 21",    "type": "CHK-SUM", "group":"VERIFY", "mask": 3072,     "comment": "BIT-21 (10+11) Verification"},
+    "CHECK-25":           {"val": 33554432,   "expr": "1 << 25",    "type": "CHK-SUM", "group":"VERIFY", "mask": 12288,    "comment": "BIT-25 Verification 12+13"},
+    "CHECK-29":           {"val": 536870912,  "expr": "1 << 29",    "type": "CHK-SUM", "group":"VERIFY", "mask": 49152,    "comment": "BIT-29 14+15 Verification"},
+    "CANARY_S":           {"val": 89130487,   "expr": "0x055005f7", "type": "CANARY",  "group":"VERIFY", "mask": 22021623, "comment": "Compound multi-byte valid"}
   }
 }
