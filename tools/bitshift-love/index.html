@@ -618,7 +618,7 @@
                         comment: comment 
                     };
 
-                    if (type === "CHK-SUM" || type.includes("CHK") || type === "CANARY") {
+                    if (type === "CHK-SUM" || type.includes("CHK") || type === "CANARY" && bitmaskValue > 0) {
                         intFlagRules.push({
                             target: targetedChannelIndex,
                             mask: BigInt(bitmaskValue), 
@@ -798,27 +798,32 @@
         }
     }
 
-
-
     function renderRulesInterfaceList() {
         const wrapper = document.getElementById("rulesConfigWrapper");
         if (!wrapper) return;
-        wrapper.innerHTML = "";
+        wrapper.innerHTML = ""; // Hard clear container layout memory
         
-        if (intFlagRules.length === 0) {
-            wrapper.innerHTML = `<div class="text-muted xs p-1 text-center" style="font-size:0.7rem;">No active checkbit dependencies loaded.</div>`;
+        // Isolate pure operational rules that have active masks
+        const operationalRules = intFlagRules.filter(rule => rule.mask > 0n);
+        
+        if (operationalRules.length === 0) {
+            wrapper.innerHTML = `<div class="text-muted xs p-2 text-center" style="font-size:0.7rem;">No active zero-trust canaries loaded.</div>`;
             return;
         }
 
-        intFlagRules.forEach((rule, index) => {
+        operationalRules.forEach((rule) => {
             const div = document.createElement("div");
             div.className = "p-1 mb-1 border rounded bg-body-tertiary d-flex justify-content-between align-items-center font-monospace";
             div.style.fontSize = "0.72rem";
+            
+            // Format target display for multi-byte signatures or regular bit tracks
+            const targetDisplay = rule.target === 999 ? 'Global' : `Bit ${rule.target}`;
+            
             div.innerHTML = `
                 <div>
-                    <span class="text-warning fw-bold">Bit ${rule.target}</span> &larr; [${rule.sources.length > 0 ? rule.sources.join(" + ") : 'NONE'}]
+                    <span class="text-warning fw-bold">${targetDisplay}</span> &larr; Mask: <span class="text-info">0x${rule.mask.toString(16).toUpperCase()}</span>
                 </div>
-                <span class="badge bg-secondary font-monospace" style="font-size:0.6rem;">Dynamic CHK</span>
+                <span class="badge bg-secondary font-monospace" style="font-size:0.6rem;">${rule.label}</span>
             `;
             wrapper.appendChild(div);
         });
