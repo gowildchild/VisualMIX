@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bitshift Love v0.81 | VisualMIX</title>
+    <title>Bitshift Love v0.82 | VisualMIX</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/gowildchild/VisualMIX@main/front-end/ui/dirty_style.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/gowildchild/VisualMIX@main/front-end/ui/dirty_menu.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/gowildchild/VisualMIX@main/front-end/telemetry/dirty_leds.css">
@@ -844,6 +844,10 @@
     }
 
     function toggleSingleBitNode(idx) {
+        if (idx === 0) {
+            showToastNotification("🔒 BIT-0 Cannot be toggled");
+            return;
+        }        
         const mask = 1n << BigInt(idx);
         bitValue ^= mask; 
         evaluateIntFlagAutomations();
