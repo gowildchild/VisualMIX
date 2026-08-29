@@ -845,7 +845,9 @@
 
     function toggleSingleBitNode(idx) {
         if (idx === 0) {
-            showToastNotification("🔒 BIT-0 Cannot be toggled");
+            const meta = loadedMetadataMap[0];
+            const dynamicRootName = meta && meta.key ? meta.key : "ROOT";
+            showToastNotification(`🔒 ${dynamicRootName} cannot be toggled offline.`);
             return;
         }        
         const mask = 1n << BigInt(idx);
