@@ -32,7 +32,7 @@
             background-color: var(--bs-body-bg);
             padding: 12px;
             border-radius: 6px;
-            margin-bottom: 90px !important; /* Expanded depth offset boundary accommodating 45-degree angle descriptions */
+            margin-bottom: 95px !important; /* Safely pushes the next byte row down to make room for labels */
         }
         .byte-title {
             color: var(--cyan-text);
@@ -65,26 +65,16 @@
             user-select: none;
             transition: all 0.15s ease-in-out;
             font-size: 0.75rem;
+            position: relative; /* CRITICAL: Allows absolute labels to anchor directly beneath this cell */
         }
         .bit-cell:hover {
             background-color: var(--bs-secondary-bg);
         }
 
-        /* Hardware-level Slanted Description Matrices Layout Elements */
-        .bit-labels-row {
-            display: grid;
-            grid-template-columns: repeat(8, 1fr) !important;
-            gap: 6px;
-            margin-top: 4px;
-        }
-        .slanted-label-wrapper {
-            position: relative;
-            height: 65px;
-            overflow: visible;
-        }
-        .slanted-label-text {
+        /* Self-Contained 45-Degree Label System */
+        .bit-cell-slant-text {
             position: absolute;
-            top: 5px;
+            top: 54px; /* Sits exactly below the 52px height boundary of the cell */
             left: 50%;
             transform: rotate(45deg);
             transform-origin: top left;
@@ -93,13 +83,15 @@
             font-size: 0.65rem;
             font-weight: bold;
             color: var(--cyan-text);
-            width: 120px;
+            width: 110px;
             overflow: hidden;
             text-overflow: ellipsis;
-            padding-left: 5px;
+            text-align: left;
+            pointer-events: none; /* Prevents text from blocking mouse clicks on the interface */
+            padding-left: 4px;
             border-left: 1px dashed rgba(0, 240, 255, 0.2);
         }
-        .slanted-label-text.empty-wire {
+        .bit-cell-slant-text.empty-wire {
             color: #555555;
             border-left: 1px dashed rgba(255, 255, 255, 0.05);
         }
@@ -145,13 +137,14 @@
         }
         
         @media (min-width: 1400px) {
-            .bit-matrix-row, .bit-labels-row {
+            .bit-matrix-row {
                 display: grid !important;
                 grid-template-columns: repeat(8, 1fr) !important; /* Force grids to stack as 8-bit columns */
                 gap: 6px;
             }
         }
     </style>
+
 
 </head>
 <body class="bg-body text-body py-4">
