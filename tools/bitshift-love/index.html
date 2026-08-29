@@ -27,7 +27,7 @@
         /* Expanded bottom padding inside matrix containers to safely clear the 45-degree slanted text */
         .card:has(.bit-matrix-row) {
             margin-bottom: 95px !important;
-            transition: margin 0.2s ease-in-out;
+            transition: margin 0.2s ease-in-out, border 0.15s ease-in-out, background-color 0.15s ease-in-out;
         }
 
         .bit-matrix-row {
@@ -187,7 +187,6 @@
                     <option value="256">256-bit</option>
                 </select>
             </div>
-            <!-- Theme Toggle -->
             <button id="themeToggleBtn" class="btn btn-outline-secondary btn-sm" title="Toggle Theme">
                 <i id="themeIcon" class="bi bi-moon-stars-fill"></i>
             </button>
@@ -218,6 +217,7 @@
                     </div>
                 </div>
             </div>
+            
             <!-- Radix Synchronized Input Conversion Grid -->
             <div class="card mb-4 shadow-sm">
                 <div class="card-header bg-body-secondary py-2 fw-semibold small">Synchronized Radix Converter & Multi-Base Input</div>
@@ -259,7 +259,7 @@
                 </div>
             </div>
 
-            <!-- Bit Interactive Canvas Matrix Grid -->
+            <!-- Bit Interactive Canvas Matrix Grid (Hooks Drag & Drop Listeners) -->
             <div id="bitMatrixContainer">
                 <!-- Dynamically generated rows of max 32 bits grouped neatly -->
             </div>
@@ -290,6 +290,7 @@
                 </div>
             </div>
         </div>
+
         <div class="col-lg-3">
             <!-- Bit Math Metric Statistics -->
             <div class="card mb-4 shadow-sm border-start border-primary border-3">
@@ -343,14 +344,25 @@
                 </div>
             </div>
 
-            <!-- JSON Architecture Sync Exporter Frame -->
+            <!-- JSON Architecture Sync Exporter Frame with Integrated Sidebar Address Input -->
             <div class="card shadow-sm">
                 <div class="card-header fw-semibold small py-2 bg-body-secondary">Universal Metadata JSON Config</div>
                 <div class="card-body p-2">
-                    <!-- URL Auto-Loader Address Bar Component integrated into the sidebar card -->
+                    
+                    <!-- 📁 MODEL REPOSITORY PROFILE RE-ROUTER SELECTOR -->
+                    <div class="input-group input-group-sm mb-2">
+                        <span class="input-group-text bg-dark-subtle text-warning font-monospace small" style="font-size:0.65rem;"><i class="bi bi-folder-fill"></i></span>
+                        <select id="structProfileSelect" class="form-select font-monospace text-warning bg-body" style="font-size:0.65rem;" onchange="handleStructFolderSelectionChange()">
+                            <option value="custom" selected>-- Switch Struct Map --</option>
+                            <option value="basic.json">basic.json (VisualMIX Core)</option>
+                            <option value="existenz.json">existenz.json CORE (128-bit Human Matrix)</option>
+                        </select>
+                    </div>
+
+                    <!-- Cloud URL Auto-Loader Bus Component Input Line -->
                     <div class="input-group input-group-sm mb-2">
                         <span class="input-group-text bg-dark-subtle text-info font-monospace fw-bold" style="font-size:0.65rem;">URL</span>
-                        <input type="text" id="configUrlInput" class="form-control font-monospace small" style="font-size:0.65rem;" value="https://raw.githubusercontent.com/gowildchild/VisualMIX/refs/heads/main/tools/struct/basic.json">
+                        <input type="text" id="configUrlInput" class="form-control font-monospace small" style="font-size:0.65rem;" value="https://raw.githubusercontent.com">
                         <button class="btn btn-xs btn-dark text-info font-monospace px-1 fw-bold" style="font-size:0.65rem;" onclick="triggerRemoteUrlFetch()">Fetch</button>
                     </div>
 
@@ -383,7 +395,7 @@
     const maxHistoryCount = 25;
     
     let loadedMetadataMap = {};
-    let intFlagRules = []; // Constructed completely dynamically out of your config map!
+    let intFlagRules = []; 
 
     document.addEventListener("DOMContentLoaded", () => {
         setupTheme();
@@ -391,8 +403,44 @@
         renderRulesInterfaceList();
         updateAllDisplays(true);
 
-        // FEATURE INTEGRATION: Fire remote cloud fetch automatically on startup safely
+        // Auto-fetch remote configuration target on layout window startup safely
         triggerRemoteUrlFetch();
+
+        // 📁 FILE SYSTEM INTERACTIVE CANVAS DRAG-AND-DROP RE-RENDER ENGINE
+        const dropZoneCard = document.getElementById("bitMatrixContainer")?.parentElement;
+        if (dropZoneCard) {
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropZoneCard.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    dropZoneCard.style.borderColor = "var(--border-glow)";
+                    dropZoneCard.style.backgroundColor = "rgba(0, 255, 170, 0.02)";
+                }, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropZoneCard.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    dropZoneCard.style.borderColor = "";
+                    dropZoneCard.style.backgroundColor = "";
+                }, false);
+            });
+
+            dropZoneCard.addEventListener('drop', (e) => {
+                const droppedFiles = e.dataTransfer.files;
+                if (droppedFiles.length > 0) {
+                    const targetFile = droppedFiles[0];
+                    if (targetFile.name.endsWith('.json')) {
+                        const fileReaderEngine = new FileReader();
+                        fileReaderEngine.onload = (event) => {
+                            document.getElementById("jsonConfigArea").value = event.target.result;
+                            parseAndApplyJsonPayload(event.target.result);
+                            showToastNotification("📁 Local schema layout drop compiled successfully.");
+                        };
+                        fileReaderEngine.readAsText(targetFile);
+                    }
+                }
+            }, false);
+        }
 
         document.getElementById("archSelect").addEventListener("change", (e) => {
             currentBitWidth = parseInt(e.target.value);
@@ -445,12 +493,30 @@
         });
     });
 
-    // Cloud Data Bus Asynchronous Fetcher Layer
+<script>
+    // Fork-Friendly Domain Whitelist Fetcher Bus
     async function triggerRemoteUrlFetch() {
         const targetUrl = document.getElementById("configUrlInput").value.trim();
         if (!targetUrl) return;
 
         try {
+            const parsedUrl = new URL(targetUrl);
+            
+            if (parsedUrl.protocol !== "https:") {
+                alert("❌ Security Block: Only secure HTTPS request connections are permitted.");
+                return;
+            }
+
+            // FORK-SAFE SECURITY WHITELIST: Validates GitHub's raw server while accepting any user fork name
+            const isWhitelistedDomain = parsedUrl.hostname.endsWith("raw.githubusercontent.com");
+            const isValidGitHubPathPattern = /^\/[a-zA-Z0-9_\-]+\/[a-zA-Z0-9_\-]+\//.test(parsedUrl.pathname);
+
+            if (!isWhitelistedDomain || !isValidGitHubPathPattern) {
+                alert("❌ Security Block: Access Denied. Untrusted blueprint schema resource destination.");
+                console.warn(`[SECURITY INTERCEPT] Blocked suspicious endpoint destination path: ${parsedUrl.hostname}${parsedUrl.pathname}`);
+                return;
+            }
+
             const response = await fetch(targetUrl);
             if (response.ok) {
                 const jsonText = await response.text();
@@ -458,18 +524,52 @@
                 if (jsonText && jsonText.includes("UNIVERSAL_META_BITS")) {
                     document.getElementById("jsonConfigArea").value = jsonText;
                     parseAndApplyJsonPayload(jsonText);
-                    showToastNotification("🌐 Live matrix blueprint loaded from GitHub ecosystem.");
+                    showToastNotification("🌐 Secure cloud blueprint loaded from GitHub ecosystem.");
                 }
             } else {
-                throw new Error("CORS or asset blocked");
+                throw new Error("Fetch failed");
             }
         } catch (error) {
-            console.log("[CORS alert] External fetch restricted by browser sandbox boundaries. Parsing textarea fallback instead.");
+            console.log("[INFO] Safe fallback loader engaged checking textarea asset cache pools.");
             const localCachedArea = document.getElementById("jsonConfigArea").value.trim();
             if (localCachedArea && localCachedArea.includes("UNIVERSAL_META_BITS")) {
                 parseAndApplyJsonPayload(localCachedArea);
             }
         }
+    }
+
+    // Dynamic Select Router: Swaps directory maps on click while preserving custom fork user handles
+    function handleStructFolderSelectionChange() {
+        const selector = document.getElementById("structProfileSelect");
+        const urlInput = document.getElementById("configUrlInput");
+        if (!selector || !urlInput) return;
+        
+        const selectedFileName = selector.value;
+        if (selectedFileName === "custom") return;
+
+        // Isolate current active account and repository strings out of the address box dynamically to keep forks intact
+        let currentUrlValue = urlInput.value.trim();
+        let accountHandle = "gowildchild";
+        let repoHandle = "VisualMIX";
+        
+        try {
+            const currentUrlObj = new URL(currentUrlValue);
+            let pathSplits = currentUrlObj.pathname.split("/");
+            if (pathSplits.length >= 3) {
+                accountHandle = pathSplits[1];
+                repoHandle = pathSplits[2];
+            }
+        } catch(e) {}
+
+        // Reassemble fresh matching location string pathways safely
+        if (selectedFileName === "basic.json") {
+            urlInput.value = `https://raw.githubusercontent.com/{accountHandle}/${repoHandle}/refs/heads/main/tools/struct/basic.json`;
+        } else {
+            // Support jumping repository references natively into your custom fields
+            urlInput.value = `https://raw.githubusercontent.com/{accountHandle}/${selectedFileName === 'existenz.json' ? 'Existenz' : repoHandle}/refs/heads/main/tools/struct/${selectedFileName}`;
+        }
+
+        triggerRemoteUrlFetch();
     }
 
     function setupTheme() {
@@ -614,20 +714,7 @@
         updateAllDisplays(true);
     }
 
-    function executeInvert() {
-        bitValue = ~bitValue;
-        const mask = (1n << BigInt(currentBitWidth)) - 1n;
-        bitValue &= mask;
-        evaluateIntFlagAutomations();
-        updateAllDisplays(true);
-    }
-
-    function executeSetAll() {
-        bitValue = (1n << BigInt(currentBitWidth)) - 1n;
-        evaluateIntFlagAutomations();
-        updateAllDisplays(true);
-    }
-
+<script>
     function executeClearAll() {
         bitValue = 0n;
         evaluateIntFlagAutomations();
@@ -713,6 +800,7 @@
             pushHistoryState();
         }
     }
+
     function renderByteTableBreakdown() {
         const tbody = document.getElementById("byteFieldsTableBody");
         if (!tbody) return;
@@ -821,6 +909,7 @@
         parseAndApplyJsonPayload(rawStr);
     }
 
+    // Dynamic Comment-Based Checkbit Association Engine
     function parseAndApplyJsonPayload(jsonTextString) {
         try {
             if (!jsonTextString || !jsonTextString.includes("UNIVERSAL_META_BITS")) return;
@@ -830,8 +919,7 @@
             
             loadedMetadataMap = {};
             intFlagRules = []; 
-            let detectedActiveBits = [];
-
+            
             Object.entries(parsed.UNIVERSAL_META_BITS).forEach(([key, node]) => {
                 if (key === "BIT-CLEAR" || key === "BIT-ON" || key.includes("SHIFT") || key.includes("-OFF") || key.includes("-ON") || key.includes("-TOGGLE") || key.includes("BYTE-0-")) {
                     return;
@@ -865,10 +953,19 @@
                 }
             });
 
+            // 🔍 AUTOMATED SYSTEM REGEX PARSER: Extracts rule structures straight out of comment metadata strings on the fly!
             Object.entries(loadedMetadataMap).forEach(([bitIdxStr, meta]) => {
                 const b = parseInt(bitIdxStr);
                 if (meta.type === "CHK-SUM" || meta.type.includes("CHK")) {
-                    let sources = detectedActiveBits.filter(src => src < b).sort((x, y) => x - y).slice(-2);
+                    let sources = [];
+                    // Regex searches for patterns like "12+13" or "4+5" or "(6+7)" inside string characters safely
+                    let pairMatch = meta.comment.match(/(\d+)\s*\+\s*(\d+)/);
+                    if (pairMatch) {
+                        sources = [parseInt(pairMatch[1]), parseInt(pairMatch[2])];
+                    } else {
+                        // Safe architectural fallback loop if no explicit string token was declared
+                        sources = detectedActiveBits.filter(src => src < b).sort((x, y) => x - y).slice(-2);
+                    }
                     intFlagRules.push({ target: b, sources: sources, label: meta.label });
                 }
             });
@@ -913,4 +1010,3 @@
 </script>
 </body>
 </html>
-    
