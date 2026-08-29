@@ -701,23 +701,22 @@
         const ruleEnabled = document.getElementById("intFlagRuleCheck").checked;
         if (!ruleEnabled || intFlagRules.length === 0) return;
 
-        intFlagRules.forEach(rule => {
-            if (rule.target >= currentBitWidth) return;
-            let allSet = true;
-            rule.sources.forEach(srcIdx => {
-                if (srcIdx < currentBitWidth) {
-                    const isSrcOn = (bitValue & (1n << BigInt(srcIdx))) !== 0n;
-                    if (!isSrcOn) allSet = false;
-                } else {
-                    allSet = false;
-                }
-            });
+        let sequentialRules = [...intFlagRules].sort((a, b) => a.target - b.target);
 
+        sequentialRules.forEach(rule => {
+            if (rule.target >= currentBitWidth) return;
+            
+            // 🚀 FIXED: Strip away the target flag's own channel index from the evaluation mask state
+            // This prevents a compound validation snapshot canary from locking itself into a permanent alert loop!
+            const validationMask = rule.mask & ~(1n << BigInt(rule.target));
+            
+            const isMaskVerified = (bitValue & validationMask) === validationMask;
             const targetMask = 1n << BigInt(rule.target);
-            if (allSet && rule.sources.length > 0) {
-                bitValue |= targetMask;
+            
+            if (isMaskVerified && rule.mask > 0n) {
+                bitValue |= targetMask; 
             } else {
-                bitValue &= ~targetMask;
+                bitValue &= ~targetMask; 
             }
         });
     }
@@ -784,6 +783,7 @@
             }
         }
     }
+
 
 
     function renderRulesInterfaceList() {
