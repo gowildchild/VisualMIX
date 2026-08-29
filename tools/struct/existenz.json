@@ -55,6 +55,6 @@
     "CHECK-21":           {"val": 2097152,    "expr": "1 << 21",    "type": "CHK-SUM", "group":"VERIFY", "mask": 3072,     "comment": "BIT-21 (10+11) Verification"},
     "CHECK-25":           {"val": 33554432,   "expr": "1 << 25",    "type": "CHK-SUM", "group":"VERIFY", "mask": 12288,    "comment": "BIT-25 Verification 12+13"},
     "CHECK-29":           {"val": 536870912,  "expr": "1 << 29",    "type": "CHK-SUM", "group":"VERIFY", "mask": 49152,    "comment": "BIT-29 14+15 Verification"},
-    "CANARY_S":           {"val": 89130487,   "expr": "0x055005f7", "type": "CANARY",  "group":"VERIFY", "mask": 22021623, "comment": "Compound multi-byte valid"}
+    "CANARY_S":           {"val": 89130487,   "expr": "0x055005f7", "type": "CHK-SUM", "group":"VERIFY", "mask": 22021623, "comment": "Compound multi-byte valid"}
   }
 }
