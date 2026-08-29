@@ -11,7 +11,7 @@
         "DISABILITY":             {"value": 64,         "expr": "1 << 6",     "type": "BIT",     "group":"BYTE-0",     "comment": "Disability"},
         "DEVELOPMENT":            {"value": 128,        "expr": "1 << 7",     "type": "BIT",     "group":"BYTE-0",     "comment": "Development"},
         "PROPERTY":               {"value": 256,        "expr": "1 << 8",     "type": "BIT",     "group":"BYTE-1",     "comment": "Property"},
-        "CANARY_2_SOMATIC":       {"value": 512,        "expr": "1 << 9",     "type": "CHK-SUM", "group":"BYTE-1",     "comment": "WATCHDOG_SOMATIC""},
+        "CANARY_2_SOMATIC":       {"value": 512,        "expr": "1 << 9",     "type": "CHK-SUM", "group":"BYTE-1",     "comment": "WATCHDOG_SOMATIC"},
         "PRESENCE":               {"value": 1024,       "expr": "1 << 10",    "type": "BIT",     "group":"BYTE-1",     "comment": "Presence on World"},
         "BIT-11":                 {"value": 2048,       "expr": "1 << 11",    "type": "BIT",     "group":"BYTE-1",     "comment": "BIT-11 toggle"},
         "BIT-12":                 {"value": 4096,       "expr": "1 << 12",    "type": "BIT",     "group":"BYTE-1",     "comment": "BIT-12 toggle"},
