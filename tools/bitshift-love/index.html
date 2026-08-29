@@ -375,17 +375,12 @@
     let stateHistory = [];
     const maxHistoryCount = 25;
     
-    // Dynamic cache layer preserving custom JSON named strings on cross-renders
+    // Global tracking storage mapping raw bit positions to custom string label objects
     let loadedMetadataMap = {};
 
-    // Rules Mapping for IntFlags Checkbits (Restored syntax integrity)
-    let intFlagRules = [
-        { target: 3, sources:, label: "Parity/IntFlag 3" },
-        { target: 9, sources:, label: "Parity/IntFlag 9" },
-        { target: 13, sources:, label: "Parity/IntFlag 13" },
-        { target: 17, sources:, label: "Parity/IntFlag 17" },
-        { target: 21, sources:, label: "Parity/IntFlag 21" }
-    ];
+    // DYNAMIC RULE LAYER: Initialized completely empty. 
+    // This is now automatically populated by parsing your universal_bitmap.json!
+    let intFlagRules = [];
 
     // Initialize components on DOM Loaded
     document.addEventListener("DOMContentLoaded", () => {
@@ -394,7 +389,7 @@
         renderRulesInterfaceList();
         updateAllDisplays(true);
 
-        // Feature Update: Attempt background sync load of local json folder config map
+        // Attempt background load of local folder config map on startup
         autoLoadDefaultJsonConfig();
 
         document.getElementById("archSelect").addEventListener("change", (e) => {
@@ -456,14 +451,12 @@
                 const textData = await response.text();
                 document.getElementById("jsonConfigArea").value = textData;
                 parseAndApplyJsonPayload(textData);
-                if (typeof showToastNotification === "function") {
-                    showToastNotification("🎯 Local universal_bitmap.json auto-loaded successfully on boot!");
-                }
             }
         } catch (error) {
             console.log("[INFO] No companion universal_bitmap.json discovered in active directory. Baseline tracker canvas initialized.");
         }
     }
+    
     function setupTheme() {
         const toggleBtn = document.getElementById("themeToggleBtn");
         const icon = document.getElementById("themeIcon");
@@ -484,7 +477,7 @@
 
     function evaluateIntFlagAutomations() {
         const ruleEnabled = document.getElementById("intFlagRuleCheck").checked;
-        if (!ruleEnabled) return;
+        if (!ruleEnabled || intFlagRules.length === 0) return;
 
         intFlagRules.forEach(rule => {
             if (rule.target >= currentBitWidth) return;
@@ -499,7 +492,7 @@
             });
 
             const targetMask = 1n << BigInt(rule.target);
-            if (allSet) {
+            if (allSet && rule.sources.length > 0) {
                 bitValue |= targetMask;
             } else {
                 bitValue &= ~targetMask;
@@ -509,6 +502,7 @@
 
     function renderBitMatrixCanvas() {
         const container = document.getElementById("bitMatrixContainer");
+        if (!container) return;
         container.innerHTML = "";
 
         const totalBits = currentBitWidth;
@@ -544,7 +538,6 @@
                 cell.className = `bit-cell ${isCheckbitNode ? 'checkbit-node' : ''}`;
                 cell.setAttribute("onclick", `toggleSingleBitNode(${b})`);
                 
-                // Read configuration states dynamically from local storage mappings
                 const meta = loadedMetadataMap[b];
                 const hasLabel = meta !== undefined;
                 const slantText = hasLabel ? meta.label : 'CH-' + b;
@@ -565,20 +558,28 @@
 
     function renderRulesInterfaceList() {
         const wrapper = document.getElementById("rulesConfigWrapper");
+        if (!wrapper) return;
         wrapper.innerHTML = "";
+        
+        if (intFlagRules.length === 0) {
+            wrapper.innerHTML = `<div class="text-muted xs p-1 text-center" style="font-size:0.7rem;">No active checkbit dependencies loaded.</div>`;
+            return;
+        }
+
         intFlagRules.forEach((rule, index) => {
             const div = document.createElement("div");
             div.className = "p-1 mb-1 border rounded bg-body-tertiary d-flex justify-content-between align-items-center font-monospace";
             div.style.fontSize = "0.72rem";
             div.innerHTML = `
                 <div>
-                    <span class="text-warning fw-bold">Bit ${rule.target}</span> &larr; [${rule.sources.join(" + ")}]
+                    <span class="text-warning fw-bold">Bit ${rule.target}</span> &larr; [${rule.sources.length > 0 ? rule.sources.join(" + ") : 'NONE'}]
                 </div>
-                <span class="badge bg-secondary font-monospace" style="font-size:0.6rem;">AND/IntFlag</span>
+                <span class="badge bg-secondary font-monospace" style="font-size:0.6rem;">Dynamic CHK</span>
             `;
             wrapper.appendChild(div);
         });
     }
+
     function toggleSingleBitNode(idx) {
         const mask = 1n << BigInt(idx);
         bitValue ^= mask; 
@@ -622,10 +623,15 @@
         const mask = (1n << BigInt(currentBitWidth)) - 1n;
         bitValue &= mask;
 
-        document.getElementById("inputDec").value = bitValue.toString(10);
-        document.getElementById("inputHex").value = "0x" + bitValue.toString(16).toUpperCase();
-        document.getElementById("inputBin").value = "0b" + bitValue.toString(2);
-        document.getElementById("inputOct").value = "0o" + bitValue.toString(8);
+        const decEl = document.getElementById("inputDec");
+        const hexEl = document.getElementById("inputHex");
+        const binEl = document.getElementById("inputBin");
+        const octEl = document.getElementById("inputOct");
+
+        if (decEl) decEl.value = bitValue.toString(10);
+        if (hexEl) hexEl.value = "0x" + bitValue.toString(16).toUpperCase();
+        if (binEl) binEl.value = "0b" + bitValue.toString(2);
+        if (octEl) octEl.value = "0o" + bitValue.toString(8);
 
         let setCount = 0;
         let hiBit = -1;
@@ -653,17 +659,6 @@
                     }
                 }
 
-                if (hasLabel && (customMeta.type.includes("CHK") || customMeta.type.includes("SUM"))) {
-                    cell.classList.add("checkbit-node");
-                } else {
-                    const isLocalCheckbit = intFlagRules.some(rule => rule.target === i);
-                    if (isLocalCheckbit) {
-                        cell.classList.add("checkbit-node");
-                    } else {
-                        cell.classList.remove("checkbit-node");
-                    }
-                }
-
                 if (isSet) {
                     cell.classList.add("active-bit");
                     display.innerText = "1";
@@ -677,10 +672,16 @@
             }
         }
 
-        document.getElementById("statSetCount").innerText = setCount;
-        document.getElementById("statClearCount").innerText = currentBitWidth - setCount;
-        document.getElementById("statHiBit").innerText = hiBit;
-        document.getElementById("statLoBit").innerText = loBit;
+        const statSet = document.getElementById("statSetCount");
+        const statClear = document.getElementById("statClearCount");
+        const statHi = document.getElementById("statHiBit");
+        const statLo = document.getElementById("statLoBit");
+        const statSign = document.getElementById("statSigned");
+
+        if (statSet) statSet.innerText = setCount;
+        if (statClear) statClear.innerText = currentBitWidth - setCount;
+        if (statHi) statHi.innerText = hiBit;
+        if (statLo) statLo.innerText = loBit;
 
         let signedStr = bitValue.toString(10);
         const signBitMask = 1n << BigInt(currentBitWidth - 1);
@@ -689,7 +690,7 @@
             const signedVal = bitValue - maxUnsigned;
             signedStr = signedVal.toString(10);
         }
-        document.getElementById("statSigned").innerText = signedStr;
+        if (statSign) statSign.innerText = signedStr;
 
         renderByteTableBreakdown();
 
@@ -697,12 +698,15 @@
             pushHistoryState();
         }
     }
+    
     function renderByteTableBreakdown() {
         const tbody = document.getElementById("byteFieldsTableBody");
+        if (!tbody) return;
         tbody.innerHTML = "";
         
         const byteCount = Math.ceil(currentBitWidth / 8);
-        document.getElementById("byteCountBadge").innerText = `${byteCount} Byte${byteCount > 1 ? 's' : ''}`;
+        const badge = document.getElementById("byteCountBadge");
+        if (badge) badge.innerText = `${byteCount} Byte${byteCount > 1 ? 's' : ''}`;
 
         for (let i = byteCount - 1; i >= 0; i--) {
             const startBit = i * 8;
@@ -743,6 +747,7 @@
 
     function renderHistoryListUI() {
         const list = document.getElementById("historyStackList");
+        if (!list) return;
         list.innerHTML = "";
         if (stateHistory.length === 0) {
             list.innerHTML = `<div class="p-2 text-muted text-center small" style="font-size:0.75rem;">No history logged yet.</div>`;
@@ -757,12 +762,12 @@
             list.appendChild(button);
         });
     }
-
     function revertToHistoricalState(idx) {
         const state = stateHistory[idx];
         if (!state) return;
         currentBitWidth = state.width;
-        document.getElementById("archSelect").value = currentBitWidth.toString();
+        const archEl = document.getElementById("archSelect");
+        if (archEl) archEl.value = currentBitWidth.toString();
         bitValue = state.value;
         renderBitMatrixCanvas();
         updateAllDisplays(false);
@@ -806,8 +811,12 @@
             const parsed = JSON.parse(jsonTextString);
             if (!parsed.UNIVERSAL_META_BITS) { alert("Missing root 'UNIVERSAL_META_BITS' block standard."); return; }
             let computedVal = 0n, maxBit = 31;
-            loadedMetadataMap = {};
             
+            loadedMetadataMap = {};
+            intFlagRules = []; // Wipe hardcoded configurations to process dynamic schemas on the fly
+            
+            let detectedActiveBits = [];
+
             Object.entries(parsed.UNIVERSAL_META_BITS).forEach(([key, node]) => {
                 if (key === "BIT-CLEAR" || key === "BIT-ON" || key.includes("SHIFT") || key.includes("-OFF") || key.includes("-ON") || key.includes("-TOGGLE")) return;
                 let val = 0n, type = "BIT", group = "NONE", comment = "";
@@ -822,9 +831,25 @@
                     for (let b = 0; b < 256; b++) {
                         if ((val & (1n << BigInt(b))) !== 0n) {
                             if (b > maxBit) maxBit = b;
+                            if (type !== "CHK-SUM" && !type.includes("CHK")) detectedActiveBits.push(b);
+                            
                             loadedMetadataMap[b] = { key: key, label: key, type: type, group: group, comment: comment };
                         }
                     }
+                }
+            });
+
+            // AUTOMATED EXTRACTION LOOP: Extracts rules straight out of the loaded schema tags
+            Object.entries(loadedMetadataMap).forEach(([bitIdxStr, meta]) => {
+                const b = parseInt(bitIdxStr);
+                if (meta.type === "CHK-SUM" || meta.type.includes("CHK")) {
+                    // Isolate two active data lanes below this position to map as triggers
+                    let sources = detectedActiveBits.filter(src => src < b).slice(-2);
+                    intFlagRules.push({
+                        target: b,
+                        sources: sources,
+                        label: meta.label
+                    });
                 }
             });
 
@@ -835,15 +860,19 @@
             else if (maxBit >= 32) targetWidth = 48;
             
             currentBitWidth = targetWidth;
-            document.getElementById("archSelect").value = currentBitWidth.toString();
+            const archEl = document.getElementById("archSelect");
+            if (archEl) archEl.value = currentBitWidth.toString();
+            
             renderBitMatrixCanvas();
+            renderRulesInterfaceList(); // Repaint side rule container elements layout dynamically
             setBitValueSafe(computedVal);
             showToastNotification("Schema successfully loaded.");
         } catch (err) { alert("Malformed JSON data format configurations structure."); }
     }
-
+    
     function copyToClipboard(elementId) {
         const copyText = document.getElementById(elementId);
+        if (!copyText) return;
         copyText.select();
         copyText.setSelectionRange(0, 99999);
         navigator.clipboard.writeText(copyText.value).then(() => {
@@ -852,10 +881,14 @@
     }
 
     function showToastNotification(msg) {
-        document.getElementById("toastMessage").innerText = msg;
+        const messageEl = document.getElementById("toastMessage");
+        if (messageEl) messageEl.innerText = msg;
         const toastEl = document.getElementById('liveToast');
-        const toast = new bootstrap.Toast(toastEl);
-        toast.show();
-    }    
+        if (toastEl) {
+            const toast = new bootstrap.Toast(toastEl);
+            toast.show();
+        }
+    }
+</script>
 </body>
 </html>
