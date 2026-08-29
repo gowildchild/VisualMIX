@@ -13,7 +13,7 @@
     "PROPERTY":           {"val": 256,        "expr": "1 << 8",     "type": "BIT",     "group":"BYTE-1",     "comment": "Property"},
     "CANARY_2_SOMATIC":   {"val": 512,        "expr": "1 << 9",     "type": "CHK-SUM", "group":"BYTE-1",     "comment": "WATCHDOG_SOMATIC"},
     "PRESENCE":           {"val": 1024,       "expr": "1 << 10",    "type": "BIT",     "group":"BYTE-1",     "comment": "Presence on World"},
-    "BIT-11":             {"val": 2048,       "expr": "1 << 11",    "type": "BIT",     "group":"BYTE-1",     "comment": "BIT-11 toggle"},
+    "DURESS":             {"val": 2048,       "expr": "1 << 11",    "type": "BIT",     "group":"BYTE-1",     "comment": "Active Duress Signal"},
     "BIT-12":             {"val": 4096,       "expr": "1 << 12",    "type": "BIT",     "group":"BYTE-1",     "comment": "BIT-12 toggle"},
     "CANARY_3_SYSTEMIC":  {"val": 8192,       "expr": "1 << 13",    "type": "CHK-SUM", "group":"BYTE-1",     "comment": "WATCHDOG_SYSTEMIC"},
     "BIT-14":             {"val": 16384,      "expr": "1 << 14",    "type": "BIT",     "group":"BYTE-1",     "comment": "BIT-14 toggle"},
