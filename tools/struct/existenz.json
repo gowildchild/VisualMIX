@@ -21,7 +21,7 @@
         "BIT-16":                 {"value": 65536,      "expr": "1 << 16",    "type": "BIT",     "group":"BYTE-2",     "comment": "BIT-16 toggle"},
         "BIT-17":                 {"value": 131072,     "expr": "1 << 17",    "type": "CHK-SUM", "group":"BYTE-2",     "comment": "BIT-17 checksum"},
         "BIT-18":                 {"value": 262144,     "expr": "1 << 18",    "type": "BIT",     "group":"BYTE-2",     "comment": "BIT-18 toggle"},
-        "BIT-19":                 {"value": 524287,     "expr": "1 << 19",    "type": "BIT",     "group":"BYTE-2",     "comment": "BIT-19 toggle"},
+        "BIT-19":                 {"value": 524288,     "expr": "1 << 19",    "type": "BIT",     "group":"BYTE-2",     "comment": "BIT-19 toggle"},
         "BIT-20":                 {"value": 1048576,    "expr": "1 << 20",    "type": "BIT",     "group":"BYTE-2",     "comment": "BIT-20 toggle"},
         "BIT-21":                 {"value": 2097152,    "expr": "1 << 21",    "type": "CHK-SUM", "group":"BYTE-2",     "comment": "BIT-21 checksum"},
         "BIT-22":                 {"value": 4194303,    "expr": "1 << 22",    "type": "BIT",     "group":"BYTE-2",     "comment": "BIT-22 toggle"},
