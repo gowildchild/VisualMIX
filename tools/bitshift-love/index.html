@@ -105,15 +105,22 @@
             font-size: 0.65rem;
             font-weight: bold;
             color: var(--cyan-text);
-            width: 110px;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            width: 130px; /* Slightly widened to handle stacked strings gracefully */
+            overflow: visible !important;
             text-align: left;
             pointer-events: none; /* Bypasses input focus blockades */
-            padding-left: 4px;
+            padding-left: 6px;
             border-left: 1px dashed rgba(0, 240, 255, 0.25);
             opacity: 0;
             transition: opacity 0.15s ease-in-out;
+            line-height: 1.1; /* Keeps stacked text neat and compact */
+        }
+        .bit-slant-comment {
+            font-size: 0.52rem; 
+            font-weight: normal;
+            color: var(--bs-secondary-color);
+            margin-top: 1px;
+            text-transform: lowercase; /* Optional, gives a clean terminal aesthetics feel */
         }
         .bit-cell-slant-text.populated-label {
             opacity: 1; /* Retain full visibility when dynamic json elements are declared */
@@ -124,6 +131,9 @@
         .bit-cell-slant-text.empty-wire {
             color: #555555;
             border-left: 1px dashed rgba(255, 255, 255, 0.05);
+        }
+        .bit-cell-slant-text.empty-wire .bit-slant-comment {
+            color: #3d3d3d;
         }
 
         .bit-val {
@@ -649,23 +659,31 @@
                 cell.className = `bit-cell ${isCheckbitNode ? 'checkbit-node' : ''}`;
                 cell.setAttribute("onclick", `toggleSingleBitNode(${b})`);
                 
+                // Read configuration states dynamically out of loaded metadata mappings
                 const meta = loadedMetadataMap[b];
                 const hasLabel = meta !== undefined;
-                const slantText = hasLabel ? meta.label : 'CH-' + b;
+                
+                const rootName = hasLabel ? meta.key : 'CH-' + b;
+                const slantComment = hasLabel && meta.comment ? meta.comment : 'empty lane';
                 const typeClass = hasLabel ? 'populated-label' : 'empty-wire';
 
                 cell.innerHTML = `
                     <div class="bit-led"></div>
                     <span class="bit-val font-monospace" id="bitValDisplay-${b}">0</span>
                     <span class="bit-idx font-monospace">${b}</span>
+                    <!-- 🚀 STACKED 45-DEGREE TEXT: Root Name and Smaller Description Muted Underneath -->
                     <div class="bit-cell-slant-text ${typeClass}" id="bitSlant-${b}">
-                        ${slantText}
+                        <div class="text-nowrap text-truncate" style="max-width: 120px;">${rootName}</div>
+                        <div class="bit-slant-comment text-nowrap text-truncate" style="max-width: 120px;" title="${slantComment}">
+                            ${slantComment}
+                        </div>
                     </div>
                 `;
                 rowWrapper.appendChild(cell);
             }
         }
     }
+
 
     function renderRulesInterfaceList() {
         const wrapper = document.getElementById("rulesConfigWrapper");
@@ -904,95 +922,69 @@
         parseAndApplyJsonPayload(rawStr);
     }
 
-    function parseAndApplyJsonPayload(jsonTextString) {
-        try {
-            if (!jsonTextString || !jsonTextString.includes("UNIVERSAL_META_BITS") && !jsonTextString.includes("existentialCore")) return;
+    function renderBitMatrixCanvas() {
+        const container = document.getElementById("bitMatrixContainer");
+        if (!container) return;
+        container.innerHTML = "";
 
-            const parsed = JSON.parse(jsonTextString);
-            const rootBlock = parsed.UNIVERSAL_META_BITS || parsed.existentialCore;
-            if (!rootBlock) return;
+        const totalBits = currentBitWidth;
+        const rowCount = Math.ceil(totalBits / 32);
 
-            let computedVal = 0n, maxBit = 31;
-            loadedMetadataMap = {};
-            intFlagRules = []; // Reset old rules to rebuild cleanly from file parameters
+        for (let r = rowCount - 1; r >= 0; r--) {
+            const card = document.createElement("div");
+            card.className = "card mb-3 shadow-sm";
             
-            Object.entries(rootBlock).forEach(([key, node]) => {
-                if (key === "BIT-CLEAR" || key === "BIT-ON" || key.includes("SHIFT") || key.includes("-OFF") || key.includes("-ON") || key.includes("-TOGGLE") || key.includes("BYTE-0-")) {
-                    return;
-                }
+            const startBit = (r * 32) + 31;
+            const endBit = r * 32;
+            const displayStart = Math.min(startBit, totalBits - 1);
+            
+            card.innerHTML = `
+                <div class="card-header py-1 bg-body-secondary d-flex justify-content-between align-items-center small font-monospace">
+                    <span class="fw-bold">Row Chunk: Bits [${displayStart} down to ${endBit}]</span>
+                    <span class="badge bg-primary">Max 32 Wide Boundary</span>
+                </div>
+                <div class="card-body p-2">
+                    <div class="bit-matrix-row" id="bitRow-${r}"></div>
+                </div>
+            `;
+            container.appendChild(card);
+            const rowWrapper = document.getElementById(`bitRow-${r}`);
+
+            const rowMaxIndex = Math.min(startBit, totalBits - 1);
+            const rowMinIndex = endBit;
+
+            for (let b = rowMaxIndex; b >= rowMinIndex; b--) {
+                const isCheckbitNode = intFlagRules.some(rule => rule.target === b);
+                const cell = document.createElement("div");
+                cell.id = `bitCell-${b}`;
+                cell.className = `bit-cell ${isCheckbitNode ? 'checkbit-node' : ''}`;
+                cell.setAttribute("onclick", `toggleSingleBitNode(${b})`);
                 
-                let numericVal = 0n, type = "BIT", group = "NONE", comment = "", expr = "";
-                let bitmaskValue = 0;
+                // Read configuration states dynamically out of loaded metadata mappings
+                const meta = loadedMetadataMap[b];
+                const hasLabel = meta !== undefined;
                 
-                if (node && node.val !== undefined) {
-                    numericVal = BigInt(node.val); // 🚀 UPDATED: Read your clean shortened "val" field natively
-                    type = node.type || "BIT"; 
-                    group = node.group || "NONE"; 
-                    comment = node.comment || ""; 
-                    expr = node.expr || "";
-                    bitmaskValue = node.mask !== undefined ? Number(node.mask) : 0; 
-                } else {
-                    numericVal = BigInt(node || 0); 
-                    type = numericVal < 65536n ? "PILLAR" : "SHIELD";
-                }
+                const rootName = hasLabel ? meta.key : 'CH-' + b;
+                const slantComment = hasLabel && meta.comment ? meta.comment : 'empty lane';
+                const typeClass = hasLabel ? 'populated-label' : 'empty-wire';
 
-                // Math-trace the exponential Bit Shift offset position directly from the numerical value
-                let targetedChannelIndex = -1;
-                if (numericVal > 0n) {
-                    let tempVal = numericVal;
-                    let bitPositionTracker = 0;
-                    while (tempVal > 1n) {
-                        tempVal >>= 1n;
-                        bitPositionTracker++;
-                    }
-                    targetedChannelIndex = bitPositionTracker;
-                }
-
-                if (targetedChannelIndex >= 0 && targetedChannelIndex < 256) {
-                    if (targetedChannelIndex > maxBit) maxBit = targetedChannelIndex;
-                    
-                    if (type !== "CHK-SUM" && !type.includes("CHK") && type !== "CANARY") {
-                        computedVal |= (1n << BigInt(targetedChannelIndex));
-                    }
-                    
-                    let structuralSlantLabel = comment ? `${key}: ${comment}` : key;
-                    
-                    loadedMetadataMap[targetedChannelIndex] = { 
-                        key: key, 
-                        label: structuralSlantLabel, 
-                        type: type, 
-                        group: group, 
-                        comment: comment 
-                    };
-
-                    if (type === "CHK-SUM" || type.includes("CHK") || type === "CANARY") {
-                        intFlagRules.push({
-                            target: targetedChannelIndex,
-                            mask: BigInt(bitmaskValue), 
-                            label: key
-                        });
-                    }
-                }
-            });
-
-            let targetWidth = 32;
-            if (maxBit >= 128) targetWidth = 256;
-            else if (maxBit >= 64) targetWidth = 128;
-            else if (maxBit >= 48) targetWidth = 64;
-            else if (maxBit >= 32) targetWidth = 48;
-            
-            currentBitWidth = targetWidth;
-            const archEl = document.getElementById("archSelect");
-            if (archEl) archEl.value = currentBitWidth.toString();
-            
-            renderBitMatrixCanvas();
-            renderRulesInterfaceList(); 
-            setBitValueSafe(computedVal);
-            showToastNotification("Schema successfully loaded.");
-        } catch (err) { 
-            console.error("[SCHEMA FAULT ABSORBED]", err); 
+                cell.innerHTML = `
+                    <div class="bit-led"></div>
+                    <span class="bit-val font-monospace" id="bitValDisplay-${b}">0</span>
+                    <span class="bit-idx font-monospace">${b}</span>
+                    <!-- 🚀 STACKED 45-DEGREE TEXT: Root Name and Smaller Description Muted Underneath -->
+                    <div class="bit-cell-slant-text ${typeClass}" id="bitSlant-${b}">
+                        <div class="text-nowrap text-truncate" style="max-width: 120px;">${rootName}</div>
+                        <div class="bit-slant-comment text-nowrap text-truncate" style="max-width: 120px;" title="${slantComment}">
+                            ${slantComment}
+                        </div>
+                    </div>
+                `;
+                rowWrapper.appendChild(cell);
+            }
         }
     }
+
 
     // ⚡ SINGLE CLOCK-CYCLE CASCADING EVALUATION SYSTEM
     function evaluateIntFlagAutomations() {
