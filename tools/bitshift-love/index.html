@@ -1,27 +1,35 @@
-
 <!DOCTYPE html>
 <html lang="en" data-bs-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bitshaft | Bitmask Shifting Console | VisualMIX</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/gowildchild/VisualMIX@main/front-end/ui/dirty_style.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/gowildchild/VisualMIX@main/front-end/ui/dirty_menu.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/gowildchild/VisualMIX@main/front-end/telemetry/dirty_leds.css">
-    <script src="https://cdn.jsdelivr.net/gh/gowildchild/VisualMIX@main/front-end/core/universal_meta.js" defer></script>
-    <script src="https://cdn.jsdelivr.net/gh/gowildchild/VisualMIX@main/front-end/telemetry/dirty_tele.js" defer></script>
-    <script src="https://cdn.jsdelivr.net/gh/gowildchild/VisualMIX@main/front-end/ui/universal_async.js" defer></script>
-    <script src="https://cdn.jsdelivr.net/gh/gowildchild/VisualMIX@main/front-end/ui/engine_templates.js" defer></script> 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://jsdelivr.net">
+    <link rel="stylesheet" href="https://jsdelivr.net">
+    <link rel="stylesheet" href="https://jsdelivr.net">
+    <script src="https://jsdelivr.net" defer></script>
+    <script src="https://jsdelivr.net" defer></script>
+    <script src="https://jsdelivr.net" defer></script>
+    <script src="https://jsdelivr.net" defer></script> 
+    <link href="https://jsdelivr.net" rel="stylesheet">
+    <link href="https://jsdelivr.net" rel="stylesheet">
     <style>
         :root {
             --bit-box-size: 38px;
+            --border-glow: #00ffaa;
+            --cyan-text: #00f0ff;
         }
         body {
             font-family: system-ui, -apple-system, sans-serif;
             transition: background-color 0.3s, color 0.3s;
         }
+        
+        /* Expanded bottom padding inside matrix containers to safely clear the 45-degree slanted text */
+        .card:has(.bit-matrix-row) {
+            margin-bottom: 95px !important;
+            transition: margin 0.2s ease-in-out;
+        }
+
         .bit-matrix-row {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(var(--bit-box-size), 1fr));
@@ -46,7 +54,8 @@
             user-select: none;
             transition: all 0.15s ease-in-out;
             font-size: 0.75rem;
-            position: relative; /* Restored: Keeps tracker layout stable */
+            position: relative; /* Anchor target for absolute slants */
+            overflow: visible !important;
         }
         .bit-cell:hover {
             background-color: var(--bs-secondary-bg);
@@ -64,13 +73,68 @@
             color: #000;
             border-color: var(--bs-warning);
         }
+        
+        /* Tactile Hardware Status LED Component */
+        .bit-led {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background-color: #252525;
+            box-shadow: inset 0 1px 1px rgba(0,0,0,0.7);
+            transition: all 0.15s ease-in-out;
+            margin-bottom: 1px;
+        }
+        .bit-cell.active-bit .bit-led {
+            background-color: var(--border-glow);
+            box-shadow: 0 0 6px var(--border-glow), 0 0 2px var(--border-glow);
+        }
+        .bit-cell.checkbit-node.active-bit .bit-led {
+            background-color: #ffc107; /* Clear amber alert warning state */
+            box-shadow: 0 0 6px #ffc107, 0 0 2px #ffc107;
+        }
+
+        /* Dynamic 45-Degree Label Corridor */
+        .bit-cell-slant-text {
+            position: absolute;
+            top: 54px; /* Suspends text string cleanly beneath cell limits */
+            left: 50%;
+            transform: rotate(45deg);
+            transform-origin: top left;
+            white-space: nowrap;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.65rem;
+            font-weight: bold;
+            color: var(--cyan-text);
+            width: 110px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            text-align: left;
+            pointer-events: none; /* Bypasses input focus blockades */
+            padding-left: 4px;
+            border-left: 1px dashed rgba(0, 240, 255, 0.25);
+            opacity: 0;
+            transition: opacity 0.15s ease-in-out;
+        }
+        .bit-cell-slant-text.populated-label {
+            opacity: 1; /* Retain full visibility when dynamic json elements are declared */
+        }
+        .bit-cell:hover .bit-cell-slant-text {
+            opacity: 1; /* Force hover wire visibility guides on alignment tracking */
+        }
+        .bit-cell-slant-text.empty-wire {
+            color: #555555;
+            border-left: 1px dashed rgba(255, 255, 255, 0.05);
+        }
+
         .bit-val {
             font-weight: bold;
             font-size: 0.95rem;
+            line-height: 1;
         }
         .bit-idx {
             opacity: 0.65;
             font-size: 0.65rem;
+            line-height: 1;
         }
         .input-group-text-fixed {
             width: 55px;
@@ -92,62 +156,23 @@
         .copy-btn {
             cursor: pointer;
         }
-
-        /* ZERO-FOOTPRINT COUPLING LAYER: Adds the 45-degree descriptor overlay cleanly */
-        .bit-cell-tracker-slant {
-            position: absolute;
-            top: 56px;
-            left: 50%;
-            transform: rotate(45deg);
-            transform-origin: top left;
-            white-space: nowrap;
-            font-family: 'Courier New', monospace;
-            font-size: 0.65rem;
-            font-weight: bold;
-            color: #00f0ff; /* Neon cyan guide accent */
-            width: 110px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            text-align: left;
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.15s ease-in-out, transform 0.15s ease-in-out;
-            z-index: 1050;
-            padding-left: 4px;
-            border-left: 1px dashed rgba(0, 240, 255, 0.4);
-        }
-
-        /* Reveal the slanted description smoothly only when hovering the tracker button */
-        .bit-cell:hover .bit-cell-tracker-slant {
-            opacity: 1;
-            transform: rotate(45deg) translateY(0);
-        }
-
-        /* Adjust room underneath the main block row for the hover slants */
-        .bit-matrix-row:hover {
-            margin-bottom: 75px;
-            transition: margin 0.2s ease-in-out;
-        }
     </style>
-
-
-
 </head>
 <body class="bg-body text-body py-4">
 
 <div class="container-xl">
     <!-- Header Controls -->
     <header class="d-flex flex-wrap justify-content-between align-items-center pb-3 mb-4 border-bottom">
-    <nav class="top-navbar">
-        <a href="#" class="nav-brand">VisualMIX Console</a>
-        <ul class="nav-menu">
-            <li class="nav-item active"><a href="/tools/integrity/" title="Zero-Trust Integrity Check Console">Integrity Check</a></li>
-            <li class="nav-item"><a href="/tools/bitshift-love/">Bitshift Love</a></li>
-            <li class="nav-item"><a href="/tools/bitshaft/">Bitshaft</a></li>
-            <li class="nav-item"><a href="https://github.com/gowildchild/existenZ/" target="_blank" rel="noopener">existenZ</a> | <a href="https://existenz.xsrv.net/" target="_blank" rel="noopener" title="Open Simulator Menu">SIMs</a></li>
-            <li class="nav-item"><a href="https://github.com/gowildchild/VisualMIX/" target="_blank" rel="noopener">GitHub Repository</a></li>
-        </ul>
-    </nav>
+        <nav class="top-navbar">
+            <a href="#" class="nav-brand">VisualMIX Console</a>
+            <ul class="nav-menu">
+                <li class="nav-item active"><a href="/tools/integrity/" title="Zero-Trust Integrity Check Console">Integrity Check</a></li>
+                <li class="nav-item"><a href="/tools/bitshift-love/">Bitshift Love</a></li>
+                <li class="nav-item"><a href="/tools/bitshaft/">Bitshaft</a></li>
+                <li class="nav-item"><a href="https://github.com" target="_blank" rel="noopener">existenZ</a> | <a href="https://xsrv.net" target="_blank" rel="noopener" title="Open Simulator Menu">SIMs</a></li>
+                <li class="nav-item"><a href="https://github.com" target="_blank" rel="noopener">GitHub Repository</a></li>
+            </ul>
+        </nav>
         <div class="d-flex align-items-center gap-3 mt-2 mt-sm-0">
             <!-- Architecture Select -->
             <div class="input-group input-group-sm">
@@ -191,7 +216,6 @@
                     </div>
                 </div>
             </div>
-
             <!-- Radix Synchronized Input Conversion Grid -->
             <div class="card mb-4 shadow-sm">
                 <div class="card-header bg-body-secondary py-2 fw-semibold small">Synchronized Radix Converter & Multi-Base Input</div>
@@ -263,12 +287,9 @@
                     </div>
                 </div>
             </div>
-
         </div>
 
-        <!-- Right Side Panel: Live Bit Stats, Rule Settings, JSON Import/Export & History Memory -->
         <div class="col-lg-3">
-            
             <!-- Bit Math Metric Statistics -->
             <div class="card mb-4 shadow-sm border-start border-primary border-3">
                 <div class="card-header fw-semibold small py-2 bg-body-secondary">Real-Time Evaluation Metrics</div>
@@ -295,7 +316,6 @@
                     </div>
                 </div>
             </div>
-
             <!-- Dynamic Bit Rule Flag Mapping Controller -->
             <div class="card mb-4 shadow-sm">
                 <div class="card-header fw-semibold small py-2 bg-body-secondary d-flex justify-content-between align-items-center">
@@ -332,7 +352,6 @@
                     </div>
                 </div>
             </div>
-
         </div>
     </div>
 </div>
@@ -347,24 +366,25 @@
     </div>
 </div>
 
-<!-- Bootstrap 5 JS Bundle with Popper -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-    // State global representation via BigInt to securely track up to 256 bits safely
+    // State global representation via BigInt to track up to 256 bits safely
     let currentBitWidth = 32;
     let bitValue = 0n;
     let stateHistory = [];
     const maxHistoryCount = 25;
+    
+    // Dynamic cache layer preserving custom JSON named strings on cross-renders
+    let loadedMetadataMap = {};
 
     // Rules Mapping for IntFlags Checkbits
-    // Structure holds checkbit index -> array of source input condition triggers
     let intFlagRules = [
-        { target: 3, sources: [1, 2], label: "Parity/IntFlag 3" },
-        { target: 9, sources: [4, 5], label: "Parity/IntFlag 9" },
-        { target: 13, sources: [6, 7], label: "Parity/IntFlag 13" },
-        { target: 17, sources: [8, 9], label: "Parity/IntFlag 17" },
-        { target: 21, sources: [10, 11], label: "Parity/IntFlag 21" }
+        { target: 3, sources:, label: "Parity/IntFlag 3" },
+        { target: 9, sources:, label: "Parity/IntFlag 9" },
+        { target: 13, sources:, label: "Parity/IntFlag 13" },
+        { target: 17, sources:, label: "Parity/IntFlag 17" },
+        { target: 21, sources:, label: "Parity/IntFlag 21" }
     ];
 
     // Initialize components on DOM Loaded
@@ -372,12 +392,10 @@
         setupTheme();
         renderBitMatrixCanvas();
         renderRulesInterfaceList();
-        updateAllDisplays(true); // Populate initial state safely
+        updateAllDisplays(true);
 
-        // Attach global core validation listeners for textboxes
         document.getElementById("archSelect").addEventListener("change", (e) => {
             currentBitWidth = parseInt(e.target.value);
-            // Cap value matching boundaries
             const mask = (1n << BigInt(currentBitWidth)) - 1n;
             bitValue = bitValue & mask;
             renderBitMatrixCanvas();
@@ -390,12 +408,11 @@
                 if (!cleanVal || cleanVal === '-') return;
                 let val = BigInt(cleanVal);
                 if (val < 0n) {
-                    // Treat as negative constraint mapping signed limits
                     const maxUnsigned = 1n << BigInt(currentBitWidth);
                     val = (maxUnsigned + val) % maxUnsigned;
                 }
                 setBitValueSafe(val);
-            } catch(err) { /* Absorb parse fractions safely */ }
+            } catch(err) { }
         });
 
         document.getElementById("inputHex").addEventListener("input", (e) => {
@@ -422,7 +439,6 @@
             } catch(err) {}
         });
 
-        // Initialize bootstrap tooltips
         const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
         tooltipTriggerList.map(function (tooltipTriggerEl) {
             return new bootstrap.Tooltip(tooltipTriggerEl);
@@ -441,7 +457,6 @@
         });
     }
 
-    // Set value safely inside current bit width masks boundaries
     function setBitValueSafe(val) {
         const mask = (1n << BigInt(currentBitWidth)) - 1n;
         bitValue = val & mask;
@@ -449,14 +464,12 @@
         updateAllDisplays(true);
     }
 
-    // Evaluate Checkbits rules automatically when enabled (IntFlag logic)
     function evaluateIntFlagAutomations() {
         const ruleEnabled = document.getElementById("intFlagRuleCheck").checked;
         if (!ruleEnabled) return;
 
         intFlagRules.forEach(rule => {
             if (rule.target >= currentBitWidth) return;
-            // Check if all source trigger bits are fully set
             let allSet = true;
             rule.sources.forEach(srcIdx => {
                 if (srcIdx < currentBitWidth) {
@@ -467,22 +480,19 @@
                 }
             });
 
-            // If matched, force set target bit, else turn it off
             const targetMask = 1n << BigInt(rule.target);
             if (allSet) {
-                bitValue |= targetMask; // AND match activates IntFlag
+                bitValue |= targetMask;
             } else {
-                bitValue &= ~targetMask; // Turn off flag
+                bitValue &= ~targetMask;
             }
         });
     }
 
-    // Render interactive bits layout wrapped inside 32-bit row modules
     function renderBitMatrixCanvas() {
         const container = document.getElementById("bitMatrixContainer");
         container.innerHTML = "";
 
-        // Calculate rows. 32-bits maximal layout separation per row block.
         const totalBits = currentBitWidth;
         const rowCount = Math.ceil(totalBits / 32);
 
@@ -506,7 +516,6 @@
             container.appendChild(card);
             const rowWrapper = document.getElementById(`bitRow-${r}`);
 
-            // Populate boxes from high index down to low index left-to-right logic order
             const rowMaxIndex = Math.min(startBit, totalBits - 1);
             const rowMinIndex = endBit;
 
@@ -517,16 +526,25 @@
                 cell.className = `bit-cell ${isCheckbitNode ? 'checkbit-node' : ''}`;
                 cell.setAttribute("onclick", `toggleSingleBitNode(${b})`);
                 
+                // Fetch dynamic cache properties on cell construction
+                const meta = loadedMetadataMap[b];
+                const hasLabel = meta !== undefined;
+                const slantText = hasLabel ? meta.label : 'CH-' + b;
+                const typeClass = hasLabel ? 'populated-label' : 'empty-wire';
+
                 cell.innerHTML = `
-                    <span class="bit-idx font-monospace">${b}</span>
+                    <div class="bit-led"></div>
                     <span class="bit-val font-monospace" id="bitValDisplay-${b}">0</span>
+                    <span class="bit-idx font-monospace">${b}</span>
+                    <div class="bit-cell-slant-text ${typeClass}" id="bitSlant-${b}">
+                        ${slantText}
+                    </div>
                 `;
                 rowWrapper.appendChild(cell);
             }
         }
     }
 
-    // Render interactive configurable options interface
     function renderRulesInterfaceList() {
         const wrapper = document.getElementById("rulesConfigWrapper");
         wrapper.innerHTML = "";
@@ -544,15 +562,13 @@
         });
     }
 
-    // Toggle interactive single clicked elements
     function toggleSingleBitNode(idx) {
         const mask = 1n << BigInt(idx);
-        bitValue ^= mask; // Flip state array bit mask
+        bitValue ^= mask; 
         evaluateIntFlagAutomations();
         updateAllDisplays(true);
     }
 
-    // Global Operation Triggers
     function executeShift(direction) {
         if (direction === 'left') {
             bitValue = bitValue << 1n;
@@ -585,18 +601,15 @@
         updateAllDisplays(true);
     }
 
-    // Master Display Sync Core Coordinator Engine
     function updateAllDisplays(recordHistory = true) {
         const mask = (1n << BigInt(currentBitWidth)) - 1n;
         bitValue &= mask;
 
-        // Sync main inputs fields
         document.getElementById("inputDec").value = bitValue.toString(10);
         document.getElementById("inputHex").value = "0x" + bitValue.toString(16).toUpperCase();
         document.getElementById("inputBin").value = "0b" + bitValue.toString(2);
         document.getElementById("inputOct").value = "0o" + bitValue.toString(8);
 
-        // Sync individual active bit cell visual matrix DOM elements states
         let setCount = 0;
         let hiBit = -1;
         let loBit = -1;
@@ -604,9 +617,36 @@
         for (let i = 0; i < currentBitWidth; i++) {
             const cell = document.getElementById(`bitCell-${i}`);
             const display = document.getElementById(`bitValDisplay-${i}`);
+            const slantText = document.getElementById(`bitSlant-${i}`);
             const isSet = (bitValue & (1n << BigInt(i))) !== 0n;
 
+            const customMeta = loadedMetadataMap[i];
+            const hasLabel = !!customMeta;
+
             if (cell && display) {
+                if (slantText) {
+                    if (hasLabel) {
+                        slantText.innerText = customMeta.label;
+                        slantText.classList.remove("empty-wire");
+                        slantText.classList.add("populated-label");
+                    } else {
+                        slantText.innerText = `CH-${i}`;
+                        slantText.classList.add("empty-wire");
+                        slantText.classList.remove("populated-label");
+                    }
+                }
+
+                if (hasLabel && (customMeta.type.includes("CHK") || customMeta.type.includes("SUM"))) {
+                    cell.classList.add("checkbit-node");
+                } else {
+                    const isLocalCheckbit = intFlagRules.some(rule => rule.target === i);
+                    if (isLocalCheckbit) {
+                        cell.classList.add("checkbit-node");
+                    } else {
+                        cell.classList.remove("checkbit-node");
+                    }
+                }
+
                 if (isSet) {
                     cell.classList.add("active-bit");
                     display.innerText = "1";
@@ -620,33 +660,27 @@
             }
         }
 
-        // Sync Real-Time Metrics evaluation panel
         document.getElementById("statSetCount").innerText = setCount;
         document.getElementById("statClearCount").innerText = currentBitWidth - setCount;
         document.getElementById("statHiBit").innerText = hiBit;
         document.getElementById("statLoBit").innerText = loBit;
 
-        // Calculate signed evaluation (Two's Complement interpretation matching framework width)
         let signedStr = bitValue.toString(10);
         const signBitMask = 1n << BigInt(currentBitWidth - 1);
         if ((bitValue & signBitMask) !== 0n) {
-            // Negative signed detected
             const maxUnsigned = 1n << BigInt(currentBitWidth);
             const signedVal = bitValue - maxUnsigned;
             signedStr = signedVal.toString(10);
         }
         document.getElementById("statSigned").innerText = signedStr;
 
-        // Render separate byte-fields table array splits
         renderByteTableBreakdown();
 
-        // Manage rolling stack history updates tracking arrays
         if (recordHistory) {
             pushHistoryState();
         }
     }
 
-    // Break down values into separate distinct 8-bit isolated byte structures
     function renderByteTableBreakdown() {
         const tbody = document.getElementById("byteFieldsTableBody");
         tbody.innerHTML = "";
@@ -658,7 +692,6 @@
             const startBit = i * 8;
             const endBit = Math.min(startBit + 7, currentBitWidth - 1);
             
-            // Extract isolated block mask value shifts
             let byteValue = 0n;
             let binSegmentStr = "";
             
@@ -682,11 +715,9 @@
         }
     }
 
-    // Push state tracking variables history blocks
     function pushHistoryState() {
         const hexSnapshot = "0x" + bitValue.toString(16).toUpperCase();
         
-        // Avoid duplicate immediate entries onto the history track
         if (stateHistory.length > 0 && stateHistory[0].value === bitValue && stateHistory[0].width === currentBitWidth) {
             return;
         }
@@ -732,7 +763,7 @@
         document.getElementById("archSelect").value = currentBitWidth.toString();
         bitValue = state.value;
         renderBitMatrixCanvas();
-        updateAllDisplays(false); // Don't push tracking stack loops
+        updateAllDisplays(false);
     }
 
     function clearHistoryStack() {
@@ -740,42 +771,34 @@
         renderHistoryListUI();
     }
 
-    // JSON Schema Config Code Exporter / Importer Parser Engine
-    // JSON Schema Config Code Exporter / Importer Parser Engine
     function exportStateToJson() {
-        let metaObj = {
-            "UNIVERSAL_META_BITS": {
-                "BIT-CLEAR": { "value": 0, "expr": "0", "type": "PRESET", "group": "PRESET", "comment": "ALL OFF" },
-                "BIT-ON": { 
-                    "value": Number((1n << BigInt(currentBitWidth)) - 1n), 
-                    "expr": `0x${((1n << BigInt(currentBitWidth)) - 1n).toString(16).toUpperCase()}`, 
-                    "type": "DEFAULT", 
-                    "group": "PRESET", 
-                    "comment": "ALL ON" 
-                }
+        let metaObj = { "UNIVERSAL_META_BITS": {
+            "BIT-CLEAR": { "value": 0, "expr": "0", "type": "PRESET", "group": "PRESET", "comment": "ALL OFF" },
+            "BIT-ON": { 
+                "value": Number((1n << BigInt(currentBitWidth)) - 1n), 
+                "expr": `0x${((1n << BigInt(currentBitWidth)) - 1n).toString(16).toUpperCase()}`, 
+                "type": "DEFAULT", "group": "PRESET", "comment": "ALL ON" 
             }
-        };
+        }};
 
-        // Loop array properties and extract variables elements dynamically
         for (let i = 0; i < currentBitWidth; i++) {
             const isSet = (bitValue & (1n << BigInt(i))) !== 0n;
+            const cacheMeta = loadedMetadataMap[i];
+            const nameLabel = cacheMeta ? cacheMeta.key : `BIT-${i}`;
+            const typeLabel = cacheMeta ? cacheMeta.type : (intFlagRules.some(r => r.target === i) ? "CHK-SUM" : "BIT");
+            const groupLabel = cacheMeta ? cacheMeta.group : `BYTE-${Math.floor(i / 8)}`;
+            const commentLabel = cacheMeta ? cacheMeta.comment : `BIT-${i} state mask`;
+
             if (isSet) {
-                const byteGroup = Math.floor(i / 8);
-                const isCheckbitNode = intFlagRules.some(rule => rule.target === i);
-                
-                metaObj["UNIVERSAL_META_BITS"][`BIT-${i}`] = {
+                metaObj["UNIVERSAL_META_BITS"][nameLabel] = {
                     "value": Number(1n << BigInt(i)),
                     "expr": i === 0 ? "0" : `1 << ${i}`,
-                    "type": isCheckbitNode ? "CHK-SUM" : "BIT",
-                    "group": `BYTE-${byteGroup}`,
-                    "comment": `BIT-${i} toggle flags mask state`
+                    "type": typeLabel, "group": groupLabel, "comment": commentLabel
                 };
             }
         }
-
-        const jsonStr = JSON.stringify(metaObj, null, 4);
-        document.getElementById("jsonConfigArea").value = jsonStr;
-        showToastNotification("State exported to custom schema text block area below.");
+        document.getElementById("jsonConfigArea").value = JSON.stringify(metaObj, null, 4);
+        showToastNotification("State exported to text block.");
     }
 
     function importStateFromJson() {
@@ -783,51 +806,59 @@
             const rawStr = document.getElementById("jsonConfigArea").value.trim();
             if (!rawStr) return;
             const parsed = JSON.parse(rawStr);
-            
             if (!parsed.UNIVERSAL_META_BITS) {
-                alert("Missing root 'UNIVERSAL_META_BITS' node configuration block standard.");
+                alert("Missing root 'UNIVERSAL_META_BITS' block standard.");
                 return;
             }
 
             let computedVal = 0n;
-            const entries = Object.entries(parsed.UNIVERSAL_META_BITS);
-
-            // Step A: Parse every key dynamically to prevent losing custom named slots
-            entries.forEach(([key, node]) => {
-                // Filter out clear macro controls so they don't corrupt the accumulator state
-                if (key === "BIT-CLEAR" || key === "BIT-ON" || key.includes("SHIFT") || key.includes("-OFF") || key.includes("-ON") || key.includes("-TOGGLE")) {
-                    return;
-                }
+            let maxBit = 31;
+            loadedMetadataMap = {};
+            
+            Object.entries(parsed.UNIVERSAL_META_BITS).forEach(([key, node]) => {
+                if (key === "BIT-CLEAR" || key === "BIT-ON" || key.includes("SHIFT") || key.includes("-OFF") || key.includes("-ON") || key.includes("-TOGGLE")) return;
+                
+                let val = 0n;
+                let type = "BIT", group = "NONE", comment = "";
                 
                 if (node && node.value !== undefined) {
-                    const nodeVal = BigInt(node.value);
-                    
-                    // Step B: For individual tracking bits, checkbit nodes, or verifications
-                    if (key.startsWith("BIT-") || key.startsWith("CHECK-") || node.type === "HYBRID" || node.type === "CHK-SUM") {
-                        
-                        // Extract bit values safely into our registry mapping track
-                        if (key.startsWith("BIT-")) {
-                            // Singular independent bits are accumulated directly
-                            computedVal |= nodeVal;
-                        } else {
-                            // Cross-verify and bind custom validation bitmask states cleanly
-                            computedVal |= nodeVal;
+                    val = BigInt(node.value);
+                    type = node.type || "BIT";
+                    group = node.group || "NONE";
+                    comment = node.comment || "";
+                } else if (typeof node === 'number' || typeof node === 'string') {
+                    val = BigInt(node);
+                    type = val < 65536n ? "PILLAR" : "SHIELD";
+                }
+
+                computedVal |= val;
+                if (val > 0n) {
+                    for (let b = 0; b < 256; b++) {
+                        if ((val & (1n << BigInt(b))) !== 0n) {
+                            if (b > maxBit) maxBit = b;
+                            loadedMetadataMap[b] = { key: key, label: key, type: type, group: group, comment: comment };
                         }
                     }
                 }
             });
 
-            // Step C: Update your existing architecture state cleanly
+            let targetWidth = 32;
+            if (maxBit >= 128) targetWidth = 256;
+            else if (maxBit >= 64) targetWidth = 128;
+            else if (maxBit >= 48) targetWidth = 64;
+            else if (maxBit >= 32) targetWidth = 48;
+            
+            currentBitWidth = targetWidth;
+            document.getElementById("archSelect").value = currentBitWidth.toString();
+
+            renderBitMatrixCanvas();
             setBitValueSafe(computedVal);
-            showToastNotification("Schema file imported and bit values recalculated.");
+            showToastNotification("Schema successfully loaded.");
         } catch (err) {
-            alert("Malformed JSON configuration structure format. Verify inputs parameters mapping syntax.");
-            console.error(err);
+            alert("Malformed JSON data format configurations structure.");
         }
     }
 
-
-    // Helper functions
     function copyToClipboard(elementId) {
         const copyText = document.getElementById(elementId);
         copyText.select();
