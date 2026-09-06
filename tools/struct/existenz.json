@@ -28,7 +28,7 @@
     "RIGHTS_ASYLUM":      {"val": 8388608,    "expr": "1 << 23",    "type": "BIT",     "group":"BYTE-2",     "comment": "Asylum Rights (SHIELD)"},
     "RIGHTS_BASIC":       {"val": 16777216,   "expr": "1 << 24",    "type": "BIT",     "group":"BYTE-3",     "comment": "Basic Rights (SHIELD)"},
     "CANARY_5_METRICS":   {"val": 33554432,   "expr": "1 << 25",    "type": "CHK-SUM", "group":"VERIFY", "mask": 2506751,    "comment": "METRICS_OK"},
-    "CANARY_V_RIGHTS":    {"val": 67108864,   "expr": "1 << 26",    "type": "CHK-SUM", "group":"VERIFY", "mask": 66469887, "comment": "Rights_OK"},
+    "CANARY_V_RIGHTS":    {"val": 67108864,   "expr": "1 << 26",    "type": "CHK-SUM", "group":"VERIFY", "mask": 133578751, "comment": "Rights_OK"},
     "BIT-27":             {"val": 134217728,  "expr": "1 << 27",    "type": "BIT",     "group":"BYTE-3",     "comment": "BIT-27 toggle"},
     "BIT-28":             {"val": 268435456,  "expr": "1 << 28",    "type": "BIT",     "group":"BYTE-3",     "comment": "BIT-28 toggle"},
     "CANARY_USER_OK":     {"val": 536870912,  "expr": "1 << 29",    "type": "CHK-SUM", "group":"VERIFY", "mask": 133693439,    "comment": "Person_Canary_OK"},
